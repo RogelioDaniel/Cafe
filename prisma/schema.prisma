@@ -1,0 +1,84 @@
+// Prisma schema — Café Tonalli (cafetería mexicana premium CDMX)
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String
+  price       Float
+  category    String   // cafe-de-olla | antojitos | pan-dulce | postres | bebidas
+  image       String?
+  tags        String   // comma-separated: popular, nuevo, vegano, picante, sin-gluten
+  origin      String?  // provenance: e.g. "Café Veracruz, altura 1200m"
+  available   Boolean  @default(true)
+  popular     Boolean  @default(false)
+  sort        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, available, sort])
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  status        String   @default("pending") // pending | preparing | ready | picked | cancelled
+  customerName  String
+  customerPhone String
+  items         String   // JSON: [{id,name,price,qty}]
+  total         Float
+  pickupTime    String   // ISO time string "HH:mm"
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([pickupTime])
+}
+
+model Reservation {
+  id             String   @id @default(cuid())
+  status         String   @default("confirmed") // confirmed | seated | cancelled | no-show
+  name           String
+  phone          String
+  email          String?
+  partySize      Int
+  date           String   // YYYY-MM-DD
+  time           String   // HH:mm
+  tableZone      String   @default("sala") // sala | terraza | barra
+  specialRequests String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([date, time, status])
+}
+
+model StatsCounter {
+  id    String @id
+  value Int    @default(0)
+
+  @@index([id])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  avatar    String?
+  rating    Int      // 1-5
+  comment   String
+  source    String   @default("google") // google | tripadvisor | instagram
+  visible   Boolean  @default(true)
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([visible, sort])
+}
