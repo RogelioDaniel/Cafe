@@ -164,11 +164,10 @@
     linear-gradient(145deg, #170b07 0%, #2b120b 55%, #160906 100%);
   color: #fff6df;
   opacity: 1;
-  transition: opacity 320ms ease-in, visibility 320ms ease-in;
-  animation: intro-failsafe 1ms linear 5s forwards;
+  transition: opacity 300ms ease-in, visibility 300ms ease-in;
+  animation: intro-failsafe 1ms linear 3s forwards;
 }
 
-.tonalli-intro-seen .coffee-intro,
 .coffee-intro.is-leaving {
   pointer-events: none;
   opacity: 0;
@@ -216,31 +215,13 @@
   min-height: 0;
 }
 
-.coffee-intro__three,
-.coffee-intro__canvas {
-  width: 100%;
-  height: 100%;
-}
-
-.coffee-intro__canvas {
-  display: block;
-}
-
-.coffee-intro__fallback {
+.coffee-intro__loader-mark {
   position: absolute;
   left: 50%;
   top: 52%;
   width: 170px;
   height: 180px;
   transform: translate(-50%, -50%);
-  opacity: 1;
-  transition: opacity 220ms ease-out;
-}
-
-.coffee-intro__fallback.is-ready,
-.coffee-intro__stage.has-webgl .coffee-intro__fallback {
-  opacity: 0 !important;
-  transition: none;
 }
 
 .coffee-intro__cup {
@@ -275,7 +256,7 @@
   transform-origin: center bottom;
   border-radius: 0 0 40px 40px;
   background: linear-gradient(180deg, #4d170a, #1f0905);
-  animation: fallback-fill 2.2s 180ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
+  animation: fallback-fill 1.75s 120ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
 }
 
 .coffee-intro__stream {
@@ -287,7 +268,7 @@
   transform-origin: center top;
   border-radius: 0 0 999px 999px;
   background: linear-gradient(90deg, #371006, #7a2a11 45%, #2b0a04);
-  animation: fallback-stream 2.25s 120ms ease-in-out forwards;
+  animation: fallback-stream 1.85s 80ms ease-in-out forwards;
 }
 
 .coffee-intro__copy {
@@ -327,6 +308,95 @@
 
 .coffee-intro__steps span:nth-child(2) { animation-delay: 0.55s; }
 .coffee-intro__steps span:nth-child(3) { animation-delay: 1.1s; }
+
+/* === Scroll-triggered clay service in Three.js === */
+.coffee-ritual__grain {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.12;
+  background-image:
+    repeating-radial-gradient(circle at 18% 22%, transparent 0 4px, rgba(255, 235, 190, 0.13) 5px 6px),
+    repeating-linear-gradient(22deg, transparent 0 9px, rgba(255, 255, 255, 0.025) 10px 11px);
+  transform: rotate(3deg);
+  pointer-events: none;
+}
+
+.coffee-ritual__visual {
+  position: relative;
+  isolation: isolate;
+  min-height: 30rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 245, 223, 0.16);
+  border-radius: 0.25rem;
+  background:
+    radial-gradient(circle at 52% 44%, rgba(191, 65, 26, 0.28), transparent 34%),
+    linear-gradient(145deg, #160906, #35150d 62%, #1a0a07);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.28);
+}
+
+.coffee-ritual__fallback {
+  z-index: 0;
+  opacity: 0.38;
+  filter: sepia(0.25) saturate(0.82) contrast(1.08) brightness(0.58);
+  transform: scale(1.03);
+  transition: opacity 260ms ease-out;
+}
+
+.coffee-ritual__visual.is-ready .coffee-ritual__fallback {
+  opacity: 0;
+}
+
+.coffee-ritual__three,
+.coffee-ritual__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.coffee-ritual__three {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.coffee-ritual__canvas {
+  display: block;
+}
+
+.coffee-ritual__annotation {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 0.2rem;
+  max-width: calc(100% - 2rem);
+  border: 1px solid rgba(255, 245, 223, 0.18);
+  background: rgba(23, 11, 7, 0.72);
+  padding: 0.7rem 0.85rem;
+  color: #fff5df;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.coffee-ritual__annotation span {
+  color: #edaa66;
+  font: 500 0.58rem/1 var(--font-plex-mono), monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.coffee-ritual__annotation strong {
+  font: 560 0.9rem/1.2 var(--font-fraunces), Georgia, serif;
+}
+
+.coffee-ritual__annotation--top {
+  left: 1rem;
+  top: 1rem;
+}
+
+.coffee-ritual__annotation--bottom {
+  bottom: 1rem;
+  right: 1rem;
+  text-align: right;
+}
 
 @keyframes intro-failsafe {
   to { visibility: hidden; pointer-events: none; }
@@ -602,7 +672,4 @@
     animation: none !important;
   }
 
-  .coffee-intro {
-    display: none !important;
-  }
 }

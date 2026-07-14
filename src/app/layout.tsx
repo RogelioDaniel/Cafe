@@ -71,14 +71,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es-MX" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{if(sessionStorage.getItem('tonalli:intro:v2')==='seen')document.documentElement.classList.add('tonalli-intro-seen')}catch(e){}",
-          }}
-        />
-      </head>
       <body
         className={`${karla.variable} ${fraunces.variable} ${plexMono.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
       >

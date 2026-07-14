@@ -4,14 +4,14 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 interface CoffeePourSceneProps {
-  onReady: () => void;
+  onReady?: () => void;
 }
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const easeInOut = (value: number) =>
   value * value * (3 - 2 * value);
 
-export function CoffeePourScene({ onReady }: CoffeePourSceneProps) {
+export function CoffeePourScene({ onReady = () => undefined }: CoffeePourSceneProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const onReadyRef = useRef(onReady);
 
@@ -22,17 +22,14 @@ export function CoffeePourScene({ onReady }: CoffeePourSceneProps) {
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-    const fallback = host.parentElement?.querySelector<HTMLElement>(
-      ".coffee-intro__fallback"
-    );
-
     let renderer: THREE.WebGLRenderer | null = null;
     let frame = 0;
     let disposed = false;
+    let completed = false;
 
     try {
       renderer = new THREE.WebGLRenderer({
-        alpha: true,
+        alpha: false,
         antialias: true,
         powerPreference: "high-performance",
       });
@@ -44,11 +41,10 @@ export function CoffeePourScene({ onReady }: CoffeePourSceneProps) {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
-    renderer.setClearColor(0x000000, 0);
-    renderer.domElement.className = "coffee-intro__canvas";
+    renderer.setClearColor(0x2a120b, 1);
+    renderer.domElement.className = "coffee-ritual__canvas";
     renderer.domElement.setAttribute("aria-hidden", "true");
     host.appendChild(renderer.domElement);
-    host.parentElement?.classList.add("has-webgl");
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
@@ -188,7 +184,7 @@ export function CoffeePourScene({ onReady }: CoffeePourSceneProps) {
       const width = Math.max(1, host.clientWidth);
       const height = Math.max(1, host.clientHeight);
       const aspect = width / height;
-      if (aspect < 0.72) {
+      if (aspect < 0.85) {
         camera.position.set(3.05, 1.95, 8.4);
       } else {
         camera.position.set(3.45, 2.05, 5.15);
@@ -236,16 +232,19 @@ export function CoffeePourScene({ onReady }: CoffeePourSceneProps) {
       renderer.render(scene, camera);
       if (firstFrame) {
         firstFrame = false;
-        fallback?.style.setProperty("display", "none");
         onReadyRef.current();
       }
-      frame = requestAnimationFrame(render);
+      if (elapsed < 3.2) {
+        frame = requestAnimationFrame(render);
+      } else {
+        completed = true;
+      }
     };
 
     const onVisibility = () => {
       if (document.hidden) {
         cancelAnimationFrame(frame);
-      } else {
+      } else if (!completed) {
         frame = requestAnimationFrame(render);
       }
     };
@@ -269,11 +268,9 @@ export function CoffeePourScene({ onReady }: CoffeePourSceneProps) {
       renderer?.dispose();
       renderer?.forceContextLoss();
       renderer?.domElement.remove();
-      host.parentElement?.classList.remove("has-webgl");
-      fallback?.style.removeProperty("display");
       renderer = null;
     };
   }, []);
 
-  return <div ref={hostRef} className="coffee-intro__three" />;
+  return <div ref={hostRef} className="coffee-ritual__three" />;
 }
