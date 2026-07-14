@@ -45,10 +45,10 @@ export function LocationSection() {
               className="object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-background">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#170b07]/70 via-transparent to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-[#fff5df]">
               <p className="font-display text-2xl font-semibold">Café Tonalli</p>
-              <p className="text-sm text-background/80">
+              <p className="text-sm text-[#fff5df]/80">
                 Av. Álvaro Obregón 142, Roma Norte
               </p>
             </div>

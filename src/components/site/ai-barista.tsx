@@ -158,10 +158,13 @@ export function AIBarista() {
                 <Bubble key={i} msg={m} />
               ))}
               {loading && (
-                <div className="flex items-center gap-1.5 px-2 text-muted-foreground">
-                  <span className="flex h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-                  <span className="flex h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-                  <span className="flex h-2 w-2 animate-bounce rounded-full bg-primary" />
+                <div className="flex items-center gap-3 px-2 py-1 text-muted-foreground" role="status">
+                  <span className="barista-steam" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                  <span className="text-xs">Preparando tu recomendación…</span>
                 </div>
               )}
 
@@ -175,7 +178,7 @@ export function AIBarista() {
                     <button
                       key={s}
                       onClick={() => send(s)}
-                      className="block w-full rounded-lg border border-border bg-card px-3 py-2 text-left text-xs text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+                      className="block min-h-11 w-full cursor-pointer rounded-lg border border-border bg-card px-3 py-2 text-left text-xs text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
                     >
                       {s}
                     </button>
@@ -204,7 +207,7 @@ export function AIBarista() {
                 type="submit"
                 size="icon"
                 disabled={!input.trim() || loading}
-                className="h-9 w-9 shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                className="h-11 w-11 shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
                 aria-label="Enviar mensaje"
               >
                 {loading ? (

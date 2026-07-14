@@ -31,7 +31,6 @@ export const useCart = create<CartState>()(
               lines: s.lines.map((l) =>
                 l.slug === item.slug ? { ...l, qty: l.qty + 1 } : l
               ),
-              isOpen: true,
             };
           }
           return {
@@ -45,7 +44,6 @@ export const useCart = create<CartState>()(
                 qty: 1,
               },
             ],
-            isOpen: true,
           };
         }),
       remove: (slug) =>

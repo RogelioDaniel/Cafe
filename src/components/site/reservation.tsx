@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Calendar, Clock, Users, Loader2, CheckCircle2, Phone, User, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ function todayStr(offset = 0): string {
 }
 
 export function Reservation() {
+  const reduceMotion = useReducedMotion();
   const { state } = useCafeStats();
   const [date, setDate] = useState(todayStr(1));
   const [time, setTime] = useState("09:00");
@@ -109,15 +110,21 @@ export function Reservation() {
       <section id="reservar" className="scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
         <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", duration: 0.6 }}
-            className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
+            initial={
+              reduceMotion
+                ? false
+                : { scale: 1.35, rotate: -14, opacity: 0 }
+            }
+            animate={{ scale: 1, rotate: -5, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 18 }}
+            className="reservation-stamp mx-auto flex h-32 w-32 flex-col items-center justify-center rounded-full border-[3px] border-primary text-primary"
           >
-            <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+            <span className="font-mono text-[9px] uppercase tracking-[0.22em]">Tonalli</span>
+            <span className="my-1 font-display text-xl font-black uppercase leading-none">Mesa</span>
+            <span className="font-display text-xl font-black uppercase leading-none">Apartada</span>
           </motion.div>
           <h2 className="mt-6 font-display text-4xl font-semibold text-foreground">
-            ¡Tu mesa está lista!
+            El lugar ya es tuyo.
           </h2>
           <p className="mt-3 text-muted-foreground">
             Te esperamos el <strong className="text-foreground">{formatDate(date)}</strong> a las{" "}
@@ -237,7 +244,7 @@ export function Reservation() {
                   id="r-time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="mt-1.5 h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   {TIMES.map((t) => (
                     <option key={t} value={t}>{t}</option>
@@ -256,7 +263,7 @@ export function Reservation() {
                     key={n}
                     type="button"
                     onClick={() => setPartySize(n)}
-                    className={`h-9 w-9 rounded-full border text-sm font-medium transition-all ${
+                    className={`h-11 w-11 cursor-pointer rounded-full border text-sm font-medium transition-all ${
                       partySize === n
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border bg-background text-muted-foreground hover:border-primary/40"
@@ -268,7 +275,7 @@ export function Reservation() {
                 <button
                   type="button"
                   onClick={() => setPartySize(9)}
-                  className={`h-9 rounded-full border px-3 text-sm font-medium transition-all ${
+                  className={`h-11 min-w-11 cursor-pointer rounded-full border px-3 text-sm font-medium transition-all ${
                     partySize >= 9
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-background text-muted-foreground hover:border-primary/40"
@@ -287,7 +294,7 @@ export function Reservation() {
                     key={z.id}
                     type="button"
                     onClick={() => setZone(z.id)}
-                    className={`rounded-lg border p-2.5 text-left transition-all ${
+                    className={`min-h-14 cursor-pointer rounded-lg border p-2.5 text-left transition-all ${
                       zone === z.id
                         ? "border-primary bg-primary/5 ring-1 ring-primary/30"
                         : "border-border bg-background hover:border-primary/40"

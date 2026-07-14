@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Plus, Flame, Sparkles, Leaf } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/cart-store";
 import { formatMXN } from "@/lib/format";
+import { toast } from "sonner";
 import type { MenuCategoryGroup, MenuItem, MenuCategory } from "@/lib/types";
 
 interface MenuSectionProps {
@@ -25,6 +26,7 @@ const TAG_META: Record<string, { icon?: React.ElementType; className: string; la
 };
 
 export function MenuSection({ categories }: MenuSectionProps) {
+  const reduceMotion = useReducedMotion();
   const [active, setActive] = useState<MenuCategory | "todos">("todos");
   const [query, setQuery] = useState("");
 
@@ -53,22 +55,26 @@ export function MenuSection({ categories }: MenuSectionProps) {
   const totalItems = categories.reduce((a, c) => a + c.items.length, 0);
 
   return (
-    <section id="menu" className="relative scroll-mt-20 bg-background py-20 sm:py-28">
+    <section id="menu" className="relative scroll-mt-20 overflow-hidden bg-background py-20 sm:py-28">
+      <div className="menu-stain pointer-events-none absolute -right-32 top-32 h-96 w-96 opacity-30" aria-hidden="true" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.22em] text-primary">
-            La carta
-          </p>
-          <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Hecho a mano,
-            <br />
-            <span className="italic text-primary">servido con orgullo.</span>
-          </h2>
-          <p className="mt-4 text-pretty text-base text-muted-foreground">
-            Cada plato nace de productores mexicanos. Tostamos el café cada
-            mañana, hacemos la masa a mano y horneamos el pan dulce antes de
-            que abras los ojos.
+        <div className="grid items-end gap-7 border-b border-foreground/20 pb-9 lg:grid-cols-[1fr_0.72fr]">
+          <div>
+            <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-primary">
+              <span className="coffee-bean-mark" aria-hidden="true" />
+              La carta
+            </p>
+            <h2 className="mt-4 max-w-3xl font-display text-5xl font-semibold leading-[0.92] tracking-[-0.04em] text-foreground sm:text-6xl lg:text-7xl">
+              Antojos hechos
+              <br />
+              <span className="font-normal italic text-primary">al ritmo del comal.</span>
+            </h2>
+          </div>
+          <p className="max-w-xl text-pretty text-base leading-relaxed text-muted-foreground lg:pb-1 lg:text-lg">
+            Café tostado cada mañana, masa nixtamalizada en casa y pan dulce
+            que sale antes de que el barrio abra los ojos. Cada ingrediente
+            dice de dónde viene.
           </p>
         </div>
 
@@ -109,7 +115,7 @@ export function MenuSection({ categories }: MenuSectionProps) {
             {filtered.length === 0 ? (
               <motion.p
                 key="empty"
-                initial={{ opacity: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="py-16 text-center text-muted-foreground"
@@ -121,13 +127,14 @@ export function MenuSection({ categories }: MenuSectionProps) {
                 <motion.div
                   key={cat.id}
                   layout
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={reduceMotion ? false : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <div className="mb-6 flex items-baseline justify-between border-b border-border pb-3">
-                    <h3 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+                  <div className="mb-6 flex items-baseline justify-between border-b border-foreground/20 pb-3">
+                    <h3 className="flex items-center gap-3 font-display text-2xl font-semibold text-foreground sm:text-3xl">
+                      <span className="coffee-bean-mark" aria-hidden="true" />
                       {cat.name}
                     </h3>
                     <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -161,7 +168,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+      className={`min-h-11 cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all ${
         active
           ? "border-primary bg-primary text-primary-foreground shadow-sm"
           : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
@@ -174,18 +181,34 @@ function FilterChip({
 
 export function MenuItemCard({ item }: { item: MenuItem }) {
   const add = useCart((s) => s.add);
+  const openCart = useCart((s) => s.open);
+  const [justAdded, setJustAdded] = useState(false);
+
+  useEffect(() => {
+    if (!justAdded) return;
+    const timer = setTimeout(() => setJustAdded(false), 1150);
+    return () => clearTimeout(timer);
+  }, [justAdded]);
+
+  function addToOrder() {
+    add(item);
+    setJustAdded(true);
+    toast.success(`${item.name} ya está en tu pedido.`, {
+      action: { label: "Ver pedido", onClick: openCart },
+    });
+  }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
+    <article className="group relative flex flex-col overflow-hidden rounded-sm border border-border border-b-primary/35 bg-card shadow-[0_12px_30px_rgba(70,31,15,0.06)] transition-[border-color,box-shadow] duration-300 hover:border-primary/45 hover:shadow-[0_18px_38px_rgba(70,31,15,0.11)]">
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+      <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
         {item.image ? (
           <Image
             src={item.image}
             alt={item.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.035]"
             loading="lazy"
           />
         ) : (
@@ -247,15 +270,35 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
         {/* CTA */}
         <div className="mt-4 pt-1">
           <Button
-            onClick={() => add(item)}
-            className="w-full rounded-full bg-primary/95 text-primary-foreground transition-all hover:bg-primary group-hover:shadow-md"
+            onClick={addToOrder}
+            className="relative min-h-11 w-full cursor-pointer overflow-hidden rounded-md bg-primary/95 text-primary-foreground transition-colors hover:bg-primary"
             size="sm"
+            aria-live="polite"
           >
-            <Plus className="mr-1.5 h-4 w-4" />
-            Agregar
+            {justAdded ? (
+              <>
+                <SteamConfirmation />
+                Añadido al pedido
+              </>
+            ) : (
+              <>
+                <Plus className="mr-1.5 h-4 w-4" />
+                Agregar al pedido
+              </>
+            )}
           </Button>
         </div>
       </div>
     </article>
+  );
+}
+
+function SteamConfirmation() {
+  return (
+    <span className="coffee-add-steam" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+    </span>
   );
 }

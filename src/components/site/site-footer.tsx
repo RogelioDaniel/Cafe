@@ -26,29 +26,29 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="mt-auto bg-foreground text-background">
+    <footer className="mt-auto bg-[#170b07] text-[#fff5df]">
       {/* Newsletter band */}
-      <div className="border-b border-background/10">
+      <div className="border-b border-[#fff5df]/10">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
             <div className="max-w-md">
               <h3 className="font-display text-2xl font-semibold sm:text-3xl">
                 Noticias del comal
               </h3>
-              <p className="mt-2 text-sm text-background/70">
+              <p className="mt-2 text-sm text-[#fff5df]/70">
                 Recetas, eventos y nuevos cafés de temporada. Una vez al mes, sin
                 ruido.
               </p>
             </div>
             <form onSubmit={subscribe} className="flex w-full max-w-md gap-2">
               <div className="relative flex-1">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-background/40" />
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#fff5df]/40" />
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tucorreo@ejemplo.com"
-                  className="border-background/20 bg-background/5 pl-9 text-background placeholder:text-background/40 focus:border-amber-400 focus:ring-amber-400/20"
+                  className="border-[#fff5df]/20 bg-[#fff5df]/5 pl-9 text-[#fff5df] placeholder:text-[#fff5df]/40 focus:border-amber-400 focus:ring-amber-400/20"
                   autoComplete="email"
                 />
               </div>
@@ -78,12 +78,12 @@ export function SiteFooter() {
                 <span className="font-display text-lg font-semibold">
                   Café Tonalli
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-background/50">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#fff5df]/50">
                   CDMX · Roma Norte
                 </span>
               </span>
             </div>
-            <p className="mt-4 max-w-sm text-sm text-background/70">
+            <p className="mt-4 max-w-sm text-sm text-[#fff5df]/70">
               Cafetería mexicana de autor. Del metate a la taza, todos los días.
               Hecho con café de altura, maíz nixtamalizado y mucho orgullo.
             </p>
@@ -92,7 +92,7 @@ export function SiteFooter() {
                 asChild
                 size="icon"
                 variant="outline"
-                className="h-9 w-9 rounded-full border-background/20 bg-background/5 text-background hover:bg-background/10"
+                className="h-11 w-11 rounded-full border-[#fff5df]/20 bg-[#fff5df]/5 text-[#fff5df] hover:bg-[#fff5df]/10"
               >
                 <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                   <Instagram className="h-4 w-4" />
@@ -102,7 +102,7 @@ export function SiteFooter() {
                 asChild
                 size="icon"
                 variant="outline"
-                className="h-9 w-9 rounded-full border-background/20 bg-background/5 text-background hover:bg-background/10"
+                className="h-11 w-11 rounded-full border-[#fff5df]/20 bg-[#fff5df]/5 text-[#fff5df] hover:bg-[#fff5df]/10"
               >
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                   <Facebook className="h-4 w-4" />
@@ -113,23 +113,23 @@ export function SiteFooter() {
 
           {/* Links */}
           <div>
-            <h4 className="font-mono text-xs uppercase tracking-wider text-background/50">
+            <h4 className="font-mono text-xs uppercase tracking-wider text-[#fff5df]/50">
               Explora
             </h4>
             <ul className="mt-3 space-y-2 text-sm">
-              <li><a href="#menu" className="text-background/80 hover:text-amber-300 transition-colors">Menú</a></li>
-              <li><a href="#historia" className="text-background/80 hover:text-amber-300 transition-colors">Nuestra historia</a></li>
-              <li><a href="#reservar" className="text-background/80 hover:text-amber-300 transition-colors">Reservar mesa</a></li>
-              <li><a href="#ubicacion" className="text-background/80 hover:text-amber-300 transition-colors">Ubicación</a></li>
+              <li><a href="#menu" className="text-[#fff5df]/80 transition-colors hover:text-amber-300">Menú</a></li>
+              <li><a href="#historia" className="text-[#fff5df]/80 transition-colors hover:text-amber-300">Nuestra historia</a></li>
+              <li><a href="#reservar" className="text-[#fff5df]/80 transition-colors hover:text-amber-300">Reservar mesa</a></li>
+              <li><a href="#ubicacion" className="text-[#fff5df]/80 transition-colors hover:text-amber-300">Ubicación</a></li>
             </ul>
           </div>
 
           {/* Visit */}
           <div>
-            <h4 className="font-mono text-xs uppercase tracking-wider text-background/50">
+            <h4 className="font-mono text-xs uppercase tracking-wider text-[#fff5df]/50">
               Visítanos
             </h4>
-            <address className="mt-3 space-y-1 text-sm not-italic text-background/80">
+            <address className="mt-3 space-y-1 text-sm not-italic text-[#fff5df]/80">
               <p>Av. Álvaro Obregón 142</p>
               <p>Col. Roma Norte, 06700</p>
               <p>Ciudad de México</p>
@@ -143,7 +143,7 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-background/10 pt-6 text-xs text-background/50 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[#fff5df]/10 pt-6 text-xs text-[#fff5df]/50 sm:flex-row">
           <p>© {new Date().getFullYear()} Café Tonalli. Todos los derechos reservados.</p>
           <p className="flex items-center gap-1.5">
             Hecho con <Heart className="h-3 w-3 fill-accent text-accent" /> en la Ciudad de México

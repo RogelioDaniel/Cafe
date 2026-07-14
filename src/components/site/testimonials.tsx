@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Review } from "@/lib/types";
@@ -14,17 +14,18 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
+  const reduceMotion = useReducedMotion();
   const [reviews] = useState<Review[]>(initialReviews);
   const [idx, setIdx] = useState(0);
   const [auto, setAuto] = useState(true);
 
   useEffect(() => {
-    if (!auto || reviews.length === 0) return;
+    if (!auto || reduceMotion || reviews.length === 0) return;
     const t = setInterval(() => {
       setIdx((i) => (i + 1) % reviews.length);
     }, 6000);
     return () => clearInterval(t);
-  }, [auto, reviews.length]);
+  }, [auto, reduceMotion, reviews.length]);
 
   if (reviews.length === 0) return null;
 
@@ -33,34 +34,43 @@ export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
   return (
     <section className="bg-background py-20 sm:py-28">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.22em] text-primary">
+        <div className="grid gap-5 border-b border-foreground/18 pb-8 sm:grid-cols-[1fr_auto] sm:items-end sm:text-left">
+          <div>
+          <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-primary">
+            <span className="coffee-bean-mark" aria-hidden="true" />
             Lo que dice la gente
           </p>
-          <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            4.9 de 5,
+          <h2 className="mt-3 font-display text-5xl font-semibold leading-[0.94] tracking-[-0.04em] text-foreground sm:text-6xl">
+            Sobremesas que
             <br />
-            <span className="italic text-primary">2,849 reseñas.</span>
+            <span className="font-normal italic text-primary">se vuelven reseñas.</span>
           </h2>
-          <div className="mt-4 flex items-center justify-center gap-1">
+          </div>
+          <div className="sm:text-right">
+          <div className="flex items-center gap-1 sm:justify-end">
             {[1, 2, 3, 4, 5].map((s) => (
               <Star key={s} className="h-5 w-5 fill-amber-400 text-amber-400" />
             ))}
+          </div>
+          <p className="mt-2 font-display text-2xl font-semibold text-foreground">4.9 de 5</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">2,849 reseñas</p>
           </div>
         </div>
 
         {/* Featured review */}
         <div
-          className="relative mt-12 overflow-hidden rounded-3xl border border-border bg-card p-8 shadow-lg sm:p-12"
+          className="relative mt-12 overflow-hidden rounded-sm border border-border bg-card p-8 shadow-[0_18px_50px_rgba(70,31,15,0.08)] sm:p-12"
           onMouseEnter={() => setAuto(false)}
           onMouseLeave={() => setAuto(true)}
+          onFocusCapture={() => setAuto(false)}
+          onBlurCapture={() => setAuto(true)}
         >
           <Quote className="absolute right-6 top-6 h-16 w-16 text-primary/8" />
 
           <AnimatePresence mode="wait">
             <motion.div
               key={current.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
@@ -89,7 +99,7 @@ export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-9 w-9 rounded-full"
+                    className="h-11 w-11 rounded-full"
                     onClick={() => setIdx((i) => (i - 1 + reviews.length) % reviews.length)}
                     aria-label="Reseña anterior"
                   >
@@ -98,7 +108,7 @@ export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-9 w-9 rounded-full"
+                    className="h-11 w-11 rounded-full"
                     onClick={() => setIdx((i) => (i + 1) % reviews.length)}
                     aria-label="Siguiente reseña"
                   >
@@ -111,16 +121,18 @@ export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
         </div>
 
         {/* Dots */}
-        <div className="mt-6 flex justify-center gap-1.5">
+        <div className="mt-4 flex justify-center gap-0.5">
           {reviews.map((_, i) => (
             <button
               key={i}
               onClick={() => setIdx(i)}
-              className={`h-1.5 rounded-full transition-all ${
-                i === idx ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-primary/40"
-              }`}
+              className="group flex h-11 w-11 cursor-pointer items-center justify-center rounded-full"
               aria-label={`Ir a reseña ${i + 1}`}
-            />
+            >
+              <span className={`block h-1.5 rounded-full transition-all ${
+                i === idx ? "w-6 bg-primary" : "w-1.5 bg-border group-hover:bg-primary/40"
+              }`} />
+            </button>
           ))}
         </div>
       </div>

@@ -161,7 +161,7 @@ export function CartDrawer() {
           <div className="flex-1 overflow-y-auto scroll-warm px-5 py-5">
             <button
               onClick={() => setStage("cart")}
-              className="mb-4 text-sm text-muted-foreground hover:text-foreground"
+              className="mb-4 min-h-11 cursor-pointer text-sm text-muted-foreground hover:text-foreground"
             >
               ← Volver al carrito
             </button>
@@ -202,7 +202,7 @@ export function CartDrawer() {
                   id="pickup-time"
                   value={pickupTime}
                   onChange={(e) => setPickupTime(e.target.value)}
-                  className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="mt-1.5 h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   {PICKUP_TIMES.map((t) => (
                     <option key={t} value={t}>
@@ -329,7 +329,7 @@ function CartLineRow({
       <div className="flex items-center gap-1">
         <button
           onClick={onDec}
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           aria-label="Quitar uno"
         >
           <Minus className="h-3 w-3" />
@@ -339,7 +339,7 @@ function CartLineRow({
         </span>
         <button
           onClick={onInc}
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           aria-label="Agregar uno"
         >
           <Plus className="h-3 w-3" />
@@ -347,7 +347,7 @@ function CartLineRow({
       </div>
       <button
         onClick={onRemove}
-        className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent/10 hover:text-accent"
+        className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent/10 hover:text-accent"
         aria-label={`Quitar ${line.name} del carrito`}
       >
         <Trash2 className="h-3.5 w-3.5" />

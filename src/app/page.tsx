@@ -10,6 +10,7 @@ import { LocationSection } from "@/components/site/location";
 import { SiteFooter } from "@/components/site/site-footer";
 import { CartDrawer } from "@/components/site/cart-drawer";
 import { AIBarista } from "@/components/site/ai-barista";
+import { CoffeeIntro } from "@/components/site/coffee-intro";
 import type { MenuCategoryGroup, MenuItem, MenuCategory, Review } from "@/lib/types";
 
 const CATEGORY_NAMES: Record<MenuCategory, string> = {
@@ -83,8 +84,9 @@ export default async function Home() {
 
   return (
     <>
+      <CoffeeIntro />
       <Navbar />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <Hero />
         <LiveStatsBar />
         <MenuSection categories={categories} />

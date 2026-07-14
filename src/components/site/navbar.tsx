@@ -42,10 +42,10 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="#inicio"
-          className="flex items-center gap-2.5 group"
+          className="group flex min-h-11 items-center gap-2.5"
           aria-label="Café Tonalli — inicio"
         >
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105">
+          <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105">
             <Coffee className="h-4.5 w-4.5" strokeWidth={2.2} />
           </span>
           <span className="flex flex-col leading-none">
@@ -80,7 +80,7 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-9 w-9 hover:bg-secondary/80"
+            className="relative h-11 w-11 hover:bg-secondary/80"
             onClick={openCart}
             aria-label={`Abrir carrito (${count} items)`}
           >
@@ -95,7 +95,7 @@ export function Navbar() {
           <Button
             asChild
             size="sm"
-            className="ml-1 hidden h-9 rounded-full bg-primary px-4 text-primary-foreground shadow-sm hover:bg-primary/90 sm:inline-flex"
+            className="ml-1 hidden h-11 rounded-full bg-primary px-4 text-primary-foreground shadow-sm hover:bg-primary/90 sm:inline-flex"
           >
             <Link href="#reservar">Reservar</Link>
           </Button>
@@ -106,7 +106,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 md:hidden"
+                className="h-11 w-11 md:hidden"
                 aria-label="Abrir menú"
               >
                 <Menu className="h-5 w-5" />
