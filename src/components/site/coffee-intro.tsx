@@ -40,6 +40,34 @@ export function CoffeeIntro() {
   const skipButtonRef = useRef<HTMLButtonElement>(null);
   const finishing = useRef(false);
   const reducedMotionRef = useRef(false);
+  const initialHashRef = useRef<string | null>(null);
+  const hashRestoredRef = useRef(false);
+
+  const restoreInitialHash = useCallback(() => {
+    const hash = initialHashRef.current;
+    if (!hash || hash === "#inicio" || hashRestoredRef.current) return;
+
+    let target: HTMLElement | null = null;
+    try {
+      target = document.getElementById(decodeURIComponent(hash.slice(1)));
+    } catch {
+      return;
+    }
+    if (!target) return;
+
+    hashRestoredRef.current = true;
+    // The intro locks document scrolling. Restore the deep link only after the
+    // torn sheet is gone, otherwise browsers settle the hash back at the top.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.documentElement.classList.add("paper-navigation--jumping");
+        target?.scrollIntoView({ block: "start", behavior: "auto" });
+        window.requestAnimationFrame(() => {
+          document.documentElement.classList.remove("paper-navigation--jumping");
+        });
+      });
+    });
+  }, []);
 
   const finish = useCallback(() => {
     if (finishing.current) return;
@@ -56,9 +84,10 @@ export function CoffeeIntro() {
       document.documentElement.style.removeProperty("overflow");
       document.body.style.removeProperty("overflow");
       document.querySelector<HTMLElement>(".tonalli-site-stage")?.removeAttribute("inert");
+      restoreInitialHash();
       if (hardTimer.current) clearTimeout(hardTimer.current);
     }, reducedMotionRef.current ? 40 : EXIT_MS);
-  }, []);
+  }, [restoreInitialHash]);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -68,6 +97,8 @@ export function CoffeeIntro() {
     setIntroTone(INTRO_TONES[randomValues[1] % INTRO_TONES.length]);
     setCupMood(CUP_MOODS[randomValues[2] % CUP_MOODS.length]);
     reducedMotionRef.current = reducedMotion.matches;
+    initialHashRef.current = window.location.hash || null;
+    hashRestoredRef.current = false;
     document.documentElement.classList.remove("tonalli-intro-seen");
     document.documentElement.classList.remove("tonalli-hero-ready");
     document.documentElement.classList.remove("tonalli-intro-tearing");
@@ -91,6 +122,7 @@ export function CoffeeIntro() {
       document.documentElement.style.removeProperty("overflow");
       document.body.style.removeProperty("overflow");
       document.querySelector<HTMLElement>(".tonalli-site-stage")?.removeAttribute("inert");
+      restoreInitialHash();
     }, HARD_TIMEOUT_MS);
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -117,7 +149,7 @@ export function CoffeeIntro() {
       document.body.style.removeProperty("overflow");
       document.querySelector<HTMLElement>(".tonalli-site-stage")?.removeAttribute("inert");
     };
-  }, [finish]);
+  }, [finish, restoreInitialHash]);
 
   if (phase === "hidden") return null;
 

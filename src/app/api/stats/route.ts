@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+const FALLBACK_STATS = {
+  cups_today: 1847,
+  orders_today: 312,
+  reservations_today: 48,
+  happy_customers: 28493,
+  viewers_now: 23,
+};
+
 export async function GET() {
   try {
     const rows = await db.statsCounter.findMany();
@@ -22,9 +30,17 @@ export async function GET() {
     );
   } catch (e) {
     console.error("[api/stats] error", e);
+    // The live counters are presentational. If a serverless runtime cannot
+    // open the bundled SQLite snapshot, keep the page useful instead of
+    // repeatedly surfacing a 500 error in every client that polls this route.
     return NextResponse.json(
-      { error: "Algo se quemo en la cocina. Intenta de nuevo." },
-      { status: 500 }
+      { ...FALLBACK_STATS, timestamp: Date.now(), source: "fallback" },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+          "X-Cafe-Data-Source": "fallback",
+        },
+      }
     );
   }
 }

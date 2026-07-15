@@ -168,14 +168,11 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
       >
         <div className="paper-navigation__cover" />
         <div className="paper-navigation__sheet">
-          <span className="paper-navigation__ruled-lines" />
+          <span className="paper-navigation__leaf paper-navigation__leaf--left" />
+          <span className="paper-navigation__leaf paper-navigation__leaf--right">
+            <span className="paper-navigation__corner" />
+          </span>
           <span className="paper-navigation__crease" />
-          <span className="paper-navigation__corner" />
-          <div className="paper-navigation__copy">
-            <span>Comanda de ruta</span>
-            <strong>{destination.label}</strong>
-            <small>doblar · llevar · desdoblar</small>
-          </div>
           <span className="paper-navigation__tear" />
         </div>
       </div>
