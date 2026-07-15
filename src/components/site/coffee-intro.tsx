@@ -26,6 +26,7 @@ export function CoffeeIntro() {
     setPhase("leaving");
     hideTimer.current = setTimeout(() => {
       setPhase("hidden");
+      document.documentElement.style.removeProperty("overflow");
       document.body.style.removeProperty("overflow");
     }, EXIT_MS);
   }, []);
@@ -33,6 +34,7 @@ export function CoffeeIntro() {
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     document.documentElement.classList.remove("tonalli-intro-seen");
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
 
     exitTimer.current = setTimeout(
@@ -51,6 +53,7 @@ export function CoffeeIntro() {
       if (exitTimer.current) clearTimeout(exitTimer.current);
       if (hideTimer.current) clearTimeout(hideTimer.current);
       if (hardTimer.current) clearTimeout(hardTimer.current);
+      document.documentElement.style.removeProperty("overflow");
       document.body.style.removeProperty("overflow");
     };
   }, [finish]);
@@ -74,7 +77,9 @@ export function CoffeeIntro() {
         <div className="coffee-intro__loader-mark">
           <span className="coffee-intro__stream" />
           <span className="coffee-intro__cup">
-            <span className="coffee-intro__fill" />
+            <span className="coffee-intro__well">
+              <span className="coffee-intro__fill" />
+            </span>
           </span>
         </div>
       </div>

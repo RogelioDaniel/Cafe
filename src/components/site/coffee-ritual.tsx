@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { MousePointer2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const CoffeePourScene = dynamic(
@@ -68,7 +69,7 @@ export function CoffeeRitual() {
       className="coffee-ritual relative overflow-hidden bg-[#2a120b] text-[#fff5df]"
     >
       <div className="coffee-ritual__grain" aria-hidden="true" />
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-16 lg:px-8">
+      <div className="coffee-ritual__inner relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-16 lg:px-8">
         <div className="relative z-10">
           <p className="font-mono text-xs uppercase tracking-[0.22em] text-amber-300">
             La pieza de la casa
@@ -98,7 +99,7 @@ export function CoffeeRitual() {
                 </span>
                 <div>
                   <h3 className="font-display text-xl font-semibold">{title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-[#fff5df]/58">
+                  <p className="mt-1 text-base leading-relaxed text-[#fff5df]/58 sm:text-sm">
                     {description}
                   </p>
                 </div>
@@ -120,6 +121,12 @@ export function CoffeeRitual() {
             className="coffee-ritual__fallback object-cover"
           />
           {sceneVisible && <CoffeePourScene onReady={() => setSceneReady(true)} />}
+          {sceneAllowed && (
+            <div className="coffee-ritual__interaction-hint" aria-hidden="true">
+              <MousePointer2 className="h-3.5 w-3.5" />
+              Mueve para observar el barro
+            </div>
+          )}
           <div className="coffee-ritual__annotation coffee-ritual__annotation--top">
             <span>Lote de hoy</span>
             <strong>Coatepec · 1,200 msnm</strong>

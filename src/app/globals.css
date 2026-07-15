@@ -152,13 +152,25 @@
 }
 
 /* === Signature coffee-pour introduction === */
+html:has(.coffee-intro),
+body:has(.coffee-intro) {
+  overflow: hidden;
+  overscroll-behavior: none;
+  animation: intro-scroll-failsafe 1ms linear 3.05s forwards;
+}
+
 .coffee-intro {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100svh;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
   background:
     radial-gradient(circle at 50% 35%, rgba(180, 72, 31, 0.2), transparent 30%),
     linear-gradient(145deg, #170b07 0%, #2b120b 55%, #160906 100%);
@@ -249,14 +261,30 @@
   border-radius: 0 50% 50% 0;
 }
 
-.coffee-intro__fill {
+.coffee-intro__well {
   position: absolute;
   inset: 5px 4px 4px;
-  transform: scaleY(0.02);
-  transform-origin: center bottom;
+  overflow: hidden;
   border-radius: 0 0 40px 40px;
+}
+
+.coffee-intro__fill {
+  position: absolute;
+  inset: 0;
+  transform: translateY(96%);
   background: linear-gradient(180deg, #4d170a, #1f0905);
   animation: fallback-fill 1.75s 120ms cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
+  will-change: transform;
+}
+
+.coffee-intro__fill::before {
+  content: "";
+  position: absolute;
+  inset: -4px -7px auto;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, #8b3719 0 18%, #4d170a 58%, #260b05 100%);
+  box-shadow: 0 2px 6px rgba(255, 174, 103, 0.12);
 }
 
 .coffee-intro__stream {
@@ -287,6 +315,7 @@
 
 .coffee-intro__title {
   margin-top: 0.55rem;
+  text-wrap: balance;
   font: 560 clamp(1.65rem, 5vw, 2.8rem)/1.05 var(--font-fraunces), Georgia, serif;
   letter-spacing: -0.025em;
 }
@@ -356,10 +385,43 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  touch-action: pan-y;
 }
 
 .coffee-ritual__canvas {
   display: block;
+}
+
+.coffee-ritual__interaction-hint {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(255, 245, 223, 0.14);
+  border-radius: 999px;
+  background: rgba(23, 11, 7, 0.62);
+  padding: 0.48rem 0.68rem;
+  color: rgba(255, 245, 223, 0.7);
+  font: 500 0.58rem/1 var(--font-plex-mono), monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition: opacity 240ms ease-out 700ms, transform 240ms ease-out 700ms;
+  pointer-events: none;
+}
+
+.coffee-ritual__visual.is-ready .coffee-ritual__interaction-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .coffee-ritual__three { cursor: grab; }
+  .coffee-ritual__three:active { cursor: grabbing; }
 }
 
 .coffee-ritual__annotation {
@@ -398,12 +460,51 @@
   text-align: right;
 }
 
+/* === Reservation availability calendar === */
+.reservation-calendar-shell [role="gridcell"] > button {
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 0.55rem;
+}
+
+.reservation-day--available button::after,
+.reservation-day--limited button::after,
+.reservation-day--full button::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0.28rem;
+  width: 0.28rem;
+  height: 0.28rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+}
+
+.reservation-day--available button::after { background: #22c55e; }
+.reservation-day--limited button::after { background: #f59e0b; }
+.reservation-day--full button::after { background: var(--destructive); }
+
+.reservation-day--full button {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.reservation-calendar-shell button[data-selected-single="true"]::after {
+  background: currentColor;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 85%, transparent);
+}
+
 @keyframes intro-failsafe {
   to { visibility: hidden; pointer-events: none; }
 }
 
+@keyframes intro-scroll-failsafe {
+  to { overflow: auto; }
+}
+
 @keyframes fallback-fill {
-  to { transform: scaleY(0.94); }
+  to { transform: translateY(5%); }
 }
 
 @keyframes fallback-stream {
@@ -416,6 +517,110 @@
   0%, 20% { color: rgba(255, 246, 223, 0.4); }
   45%, 75% { color: #f2b46f; }
   100% { color: rgba(255, 246, 223, 0.6); }
+}
+
+@media (max-width: 480px) {
+  .coffee-intro__skip {
+    right: max(0.75rem, env(safe-area-inset-right));
+    top: max(0.75rem, env(safe-area-inset-top));
+    min-height: 44px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+  }
+
+  .coffee-intro__loader-mark {
+    top: 51%;
+    transform: translate(-50%, -50%) scale(0.86);
+  }
+
+  .coffee-intro__copy {
+    padding-right: 1rem;
+    padding-bottom: max(1.35rem, env(safe-area-inset-bottom));
+    padding-left: 1rem;
+  }
+
+  .coffee-intro__eyebrow {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+  }
+
+  .coffee-intro__title {
+    margin-right: auto;
+    margin-left: auto;
+    max-width: 20rem;
+    font-size: clamp(1.45rem, 7.4vw, 1.85rem);
+  }
+
+  .coffee-intro__steps {
+    gap: 0.85rem;
+    margin-top: 0.8rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.13em;
+  }
+
+  .coffee-ritual__inner {
+    gap: 2.75rem;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .coffee-ritual #ritual-title {
+    font-size: clamp(2.5rem, 13vw, 3rem);
+  }
+
+  .coffee-ritual__visual {
+    min-height: clamp(25rem, 128vw, 30rem);
+  }
+
+  .coffee-ritual__annotation {
+    max-width: calc(100% - 1.5rem);
+    padding: 0.6rem 0.7rem;
+  }
+
+  .coffee-ritual__annotation--top {
+    top: 0.75rem;
+    left: 0.75rem;
+  }
+
+  .coffee-ritual__annotation--bottom {
+    right: auto;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    text-align: left;
+  }
+
+  .coffee-ritual__interaction-hint {
+    display: none;
+  }
+}
+
+@media (max-height: 620px) {
+  .coffee-intro__skip {
+    top: max(0.5rem, env(safe-area-inset-top));
+  }
+
+  .coffee-intro__loader-mark {
+    top: 47%;
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+
+  .coffee-intro__copy {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .coffee-intro__eyebrow {
+    display: none;
+  }
+
+  .coffee-intro__title {
+    margin-top: 0;
+    font-size: clamp(1.25rem, 5vw, 1.65rem);
+  }
+
+  .coffee-intro__steps {
+    margin-top: 0.45rem;
+  }
 }
 
 .hero-weave {

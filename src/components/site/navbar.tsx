@@ -38,21 +38,21 @@ export function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="#inicio"
-          className="group flex min-h-11 items-center gap-2.5"
+          className="group flex min-h-11 min-w-0 items-center gap-2 sm:gap-2.5"
           aria-label="Café Tonalli — inicio"
         >
-          <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105">
+          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105 sm:h-11 sm:w-11">
             <Coffee className="h-4.5 w-4.5" strokeWidth={2.2} />
           </span>
           <span className="flex flex-col leading-none">
-            <span className="font-display text-lg font-semibold tracking-tight text-foreground">
+            <span className="whitespace-nowrap font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">
               Café Tonalli
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:block">
               CDMX · Roma Norte
             </span>
           </span>
@@ -72,7 +72,7 @@ export function Navbar() {
         </div>
 
         {/* Right cluster */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
           <LivePill />
 
           <ThemeToggle />

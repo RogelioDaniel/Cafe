@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Calendar, Clock, Users, Loader2, CheckCircle2, Phone, User, Mail, MapPin } from "lucide-react";
+import { addDays, addMonths, format, parseISO, startOfDay, startOfMonth } from "date-fns";
+import { es } from "date-fns/locale";
+import { CalendarDays, Clock, Users, Loader2, CheckCircle2, Phone, User, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Calendar as DateCalendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCafeStats } from "@/hooks/use-cafe-stats";
@@ -23,10 +26,14 @@ const ZONES = [
   { id: "barra", label: "Barra", desc: "Frente al comal" },
 ] as const;
 
+type DayAvailability = {
+  date: string;
+  slotsLeft: number;
+  status: "available" | "limited" | "full";
+};
+
 function todayStr(offset = 0): string {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toISOString().slice(0, 10);
+  return format(addDays(new Date(), offset), "yyyy-MM-dd");
 }
 
 export function Reservation() {
@@ -39,31 +46,93 @@ export function Reservation() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "" });
   const [availability, setAvailability] = useState<{ slotsLeft: number; alternativeTimes: string[] } | null>(null);
   const [checking, setChecking] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()));
+  const [monthAvailability, setMonthAvailability] = useState<DayAvailability[]>([]);
+  const [calendarChecking, setCalendarChecking] = useState(true);
+  const [calendarError, setCalendarError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState<{ id: string } | null>(null);
+  const calendarStart = useMemo(() => startOfDay(new Date()), []);
+  const calendarEnd = useMemo(() => addMonths(calendarStart, 2), [calendarStart]);
+  const selectedDate = useMemo(() => parseISO(date), [date]);
+  const calendarModifiers = useMemo(
+    () => {
+      const bookableDays = monthAvailability.filter((day) => {
+        const parsed = parseISO(day.date);
+        return parsed >= calendarStart && parsed <= calendarEnd;
+      });
+      return {
+        available: bookableDays
+          .filter((day) => day.status === "available")
+          .map((day) => parseISO(day.date)),
+        limited: bookableDays
+          .filter((day) => day.status === "limited")
+          .map((day) => parseISO(day.date)),
+        full: bookableDays
+          .filter((day) => day.status === "full")
+          .map((day) => parseISO(day.date)),
+      };
+    },
+    [calendarEnd, calendarStart, monthAvailability]
+  );
 
   // Check availability when date/time/party change (debounced)
   useEffect(() => {
     if (!date || !time) return;
     setChecking(true);
+    const controller = new AbortController();
     const t = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/reservations/availability?date=${date}&time=${time}&partySize=${partySize}`
+          `/api/reservations/availability?date=${date}&time=${time}&partySize=${partySize}`,
+          { signal: controller.signal }
         );
+        if (!res.ok) throw new Error("No se pudo consultar la disponibilidad.");
         const data = await res.json();
         setAvailability({
           slotsLeft: data.slotsLeft ?? 0,
           alternativeTimes: data.alternativeTimes ?? [],
         });
-      } catch {
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
         setAvailability(null);
       } finally {
-        setChecking(false);
+        if (!controller.signal.aborted) setChecking(false);
       }
     }, 350);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [date, time, partySize]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const month = format(visibleMonth, "yyyy-MM");
+    setCalendarChecking(true);
+    setCalendarError(false);
+
+    const loadMonth = async () => {
+      try {
+        const res = await fetch(
+          `/api/reservations/availability?month=${month}&time=${time}&partySize=${partySize}`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) throw new Error("No se pudo consultar el calendario.");
+        const data = await res.json();
+        setMonthAvailability(data.days ?? []);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setMonthAvailability([]);
+        setCalendarError(true);
+      } finally {
+        if (!controller.signal.aborted) setCalendarChecking(false);
+      }
+    };
+
+    loadMonth();
+    return () => controller.abort();
+  }, [visibleMonth, time, partySize]);
 
   const tablesAvailable = state?.tables?.filter((t) => t.status === "available").length ?? 0;
 
@@ -156,9 +225,9 @@ export function Reservation() {
   return (
     <section id="reservar" className="relative scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="grid min-w-0 gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Left — copy + live info */}
-          <div>
+          <div className="min-w-0">
             <p className="font-mono text-xs uppercase tracking-[0.22em] text-primary">
               Reservación
             </p>
@@ -218,42 +287,131 @@ export function Reservation() {
           {/* Right — form */}
           <form
             onSubmit={submit}
-            className="rounded-2xl border border-border bg-card p-6 shadow-lg sm:p-8"
+            className="-mx-2 min-w-0 rounded-2xl border border-border bg-card p-4 shadow-lg sm:mx-0 sm:p-8"
           >
-            {/* Date / time / party */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground">
+                1
+              </span>
               <div>
-                <Label htmlFor="r-date" className="text-sm font-medium flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" /> Fecha
-                </Label>
-                <Input
-                  id="r-date"
-                  type="date"
-                  value={date}
-                  min={todayStr()}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="mt-1.5"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="r-time" className="text-sm font-medium flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" /> Hora
-                </Label>
-                <select
-                  id="r-time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="mt-1.5 h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  {TIMES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
+                <p className="font-display text-lg font-semibold text-foreground">
+                  Elige cuándo vienes
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  El calendario se actualiza según la hora.
+                </p>
               </div>
             </div>
 
+            <div className="mt-5">
+              <Label htmlFor="r-time" className="flex items-center gap-1.5 text-sm font-medium">
+                <Clock className="h-3.5 w-3.5" /> Hora de llegada
+              </Label>
+              <select
+                id="r-time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="mt-1.5 h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 sm:text-sm"
+              >
+                {TIMES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="mt-4">
+              <div className="flex items-center justify-between gap-3">
+                <Label className="flex items-center gap-1.5 text-sm font-medium">
+                  <CalendarDays className="h-3.5 w-3.5" /> Fecha
+                </Label>
+                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                  Disponibilidad · {time}
+                </span>
+              </div>
+              <div className="reservation-calendar-shell relative mt-1.5 overflow-hidden rounded-xl border border-border bg-background p-1.5 sm:p-2">
+                <DateCalendar
+                  mode="single"
+                  locale={es}
+                  showOutsideDays={false}
+                  month={visibleMonth}
+                  onMonthChange={setVisibleMonth}
+                  selected={selectedDate}
+                  onSelect={(day) => {
+                    if (day) setDate(format(day, "yyyy-MM-dd"));
+                  }}
+                  startMonth={startOfMonth(calendarStart)}
+                  endMonth={startOfMonth(calendarEnd)}
+                  disabled={[
+                    { before: calendarStart },
+                    { after: calendarEnd },
+                    ...calendarModifiers.full,
+                  ]}
+                  modifiers={calendarModifiers}
+                  modifiersClassNames={{
+                    available: "reservation-day--available",
+                    limited: "reservation-day--limited",
+                    full: "reservation-day--full",
+                  }}
+                  labels={{
+                    labelDayButton: (day, modifiers) => {
+                      const status = modifiers.full
+                        ? "ocupado a esta hora"
+                        : modifiers.disabled
+                          ? "fecha no disponible"
+                        : modifiers.limited
+                          ? "última mesa disponible"
+                          : modifiers.available
+                            ? "disponible"
+                            : "sin información";
+                      return `${format(day, "PPPP", { locale: es })}, ${status}`;
+                    },
+                  }}
+                  className="w-full bg-transparent p-1 [--cell-size:2.5rem] sm:[--cell-size:2.75rem]"
+                  classNames={{
+                    root: "w-full",
+                    months: "relative flex w-full flex-col",
+                    month: "flex w-full flex-col gap-3",
+                    month_grid: "w-full border-collapse",
+                    weekdays: "flex w-full",
+                    weekday: "flex-1 select-none text-center text-[0.7rem] font-medium uppercase text-muted-foreground",
+                    week: "mt-1 flex w-full",
+                    day: "group/day relative aspect-square flex-1 p-0 text-center",
+                    today: "rounded-md bg-secondary/70 text-foreground ring-1 ring-primary/35 data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
+                    caption_label: "select-none font-display text-base font-semibold capitalize",
+                  }}
+                />
+                {calendarChecking && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/72 backdrop-blur-[2px]" aria-live="polite">
+                    <span className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-xs text-muted-foreground shadow-sm">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Actualizando fechas…
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-muted-foreground" aria-label="Leyenda de disponibilidad">
+                <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-emerald-500" /> Disponible</span>
+                <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-amber-500" /> Última mesa</span>
+                <span className="flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-destructive" /> Ocupado a esta hora</span>
+              </div>
+              {calendarError && (
+                <p className="mt-2 text-xs text-destructive" role="status">
+                  No pudimos actualizar el mes. Aún puedes elegir una fecha y la verificaremos antes de reservar.
+                </p>
+              )}
+              <p className="mt-2 text-sm text-foreground" aria-live="polite">
+                Seleccionaste <strong>{formatDate(date)}</strong> a las <strong>{time}</strong>.
+              </p>
+            </div>
+
+            <div className="mt-5 border-t border-border pt-5">
+              <div className="mb-3 flex items-center gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground">
+                  2
+                </span>
+                <p className="font-display text-lg font-semibold text-foreground">
+                  Arma tu mesa
+                </p>
+              </div>
               <Label className="text-sm font-medium flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5" /> Comensales
               </Label>
@@ -263,6 +421,8 @@ export function Reservation() {
                     key={n}
                     type="button"
                     onClick={() => setPartySize(n)}
+                    aria-label={`${n} ${n === 1 ? "comensal" : "comensales"}`}
+                    aria-pressed={partySize === n}
                     className={`h-11 w-11 cursor-pointer rounded-full border text-sm font-medium transition-all ${
                       partySize === n
                         ? "border-primary bg-primary text-primary-foreground"
@@ -275,6 +435,8 @@ export function Reservation() {
                 <button
                   type="button"
                   onClick={() => setPartySize(9)}
+                  aria-label="9 o más comensales"
+                  aria-pressed={partySize >= 9}
                   className={`h-11 min-w-11 cursor-pointer rounded-full border px-3 text-sm font-medium transition-all ${
                     partySize >= 9
                       ? "border-primary bg-primary text-primary-foreground"
@@ -288,12 +450,13 @@ export function Reservation() {
 
             <div className="mt-4">
               <Label className="text-sm font-medium">Zona</Label>
-              <div className="mt-1.5 grid grid-cols-3 gap-2">
+              <div className="mt-1.5 grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
                 {ZONES.map((z) => (
                   <button
                     key={z.id}
                     type="button"
                     onClick={() => setZone(z.id)}
+                    aria-pressed={zone === z.id}
                     className={`min-h-14 cursor-pointer rounded-lg border p-2.5 text-left transition-all ${
                       zone === z.id
                         ? "border-primary bg-primary/5 ring-1 ring-primary/30"
@@ -308,7 +471,7 @@ export function Reservation() {
             </div>
 
             {/* Live availability indicator */}
-            <div className="mt-4 flex items-center gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-xs">
+            <div className="mt-4 flex min-h-10 flex-wrap items-center gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-xs" aria-live="polite">
               {checking ? (
                 <>
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
@@ -322,16 +485,34 @@ export function Reservation() {
                   </span>
                 </>
               ) : availability ? (
-                <span className="text-accent">
-                  Lleno a esa hora · intenta {availability.alternativeTimes.slice(0, 2).join(" o ")}
-                </span>
+                <>
+                  <span className="text-destructive">Ocupado a las {time}.</span>
+                  {availability.alternativeTimes.slice(0, 2).map((alternative) => (
+                    <button
+                      key={alternative}
+                      type="button"
+                      onClick={() => setTime(alternative)}
+                      className="min-h-8 cursor-pointer rounded-full border border-primary/35 bg-background px-2.5 font-medium text-primary transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      Probar {alternative}
+                    </button>
+                  ))}
+                </>
               ) : (
-                <span className="text-muted-foreground">Selecciona fecha y hora</span>
+                <span className="text-muted-foreground">Selecciona una fecha para verificarla.</span>
               )}
             </div>
 
             {/* Contact */}
             <div className="mt-5 space-y-3 border-t border-border pt-5">
+              <div className="flex items-center gap-3 pb-1">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground">
+                  3
+                </span>
+                <p className="font-display text-lg font-semibold text-foreground">
+                  Déjanos tus datos
+                </p>
+              </div>
               <div>
                 <Label htmlFor="r-name" className="text-sm font-medium flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5" /> Nombre *
@@ -392,7 +573,7 @@ export function Reservation() {
 
             <Button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || availability?.slotsLeft === 0}
               className="mt-5 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
               size="lg"
             >

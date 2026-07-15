@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 const MAX_PER_SLOT = 4;
 const OPEN_HOUR = 7;
 const CLOSE_HOUR = 22;
+const MONTH_RE = /^\d{4}-\d{2}$/;
 
 function addMinutes(time: string, minutes: number): string {
   const [hStr, mStr] = time.split(":").map(Number);
@@ -25,17 +26,70 @@ function inOpeningHours(time: string): boolean {
   return h >= OPEN_HOUR && h < CLOSE_HOUR;
 }
 
+function isHalfHourSlot(time: string): boolean {
+  if (!/^\d{2}:\d{2}$/.test(time) || !inOpeningHours(time)) return false;
+  const minutes = Number(time.split(":")[1]);
+  return minutes === 0 || minutes === 30;
+}
+
+async function getMonthAvailability(month: string, time: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const daysInMonth = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  const nextMonthDate = new Date(Date.UTC(year, monthNumber, 1));
+  const nextMonth = `${nextMonthDate.getUTCFullYear()}-${String(
+    nextMonthDate.getUTCMonth() + 1
+  ).padStart(2, "0")}`;
+
+  const reservations = await db.reservation.findMany({
+    where: {
+      date: { gte: `${month}-01`, lt: `${nextMonth}-01` },
+      time,
+      status: { not: "cancelled" },
+    },
+    select: { date: true },
+  });
+
+  const counts = reservations.reduce<Map<string, number>>((map, reservation) => {
+    map.set(reservation.date, (map.get(reservation.date) ?? 0) + 1);
+    return map;
+  }, new Map());
+
+  return Array.from({ length: daysInMonth }, (_, index) => {
+    const date = `${month}-${String(index + 1).padStart(2, "0")}`;
+    const slotsLeft = Math.max(0, MAX_PER_SLOT - (counts.get(date) ?? 0));
+    return {
+      date,
+      slotsLeft,
+      status:
+        slotsLeft === 0 ? "full" : slotsLeft === 1 ? "limited" : "available",
+    };
+  });
+}
+
 export async function GET(req: NextRequest) {
   try {
     const date = req.nextUrl.searchParams.get("date");
     const time = req.nextUrl.searchParams.get("time");
+    const month = req.nextUrl.searchParams.get("month");
     // partySize is accepted but the slot limit is per-reservation, not per-person.
     // We surface it for the UI; it does not change `slotsLeft`.
     const _partySize = req.nextUrl.searchParams.get("partySize");
 
-    if (!date || !time) {
+    if (month) {
+      if (!MONTH_RE.test(month) || !time || !isHalfHourSlot(time)) {
+        return NextResponse.json(
+          { error: "Mes u horario inválido." },
+          { status: 400 }
+        );
+      }
+
+      const days = await getMonthAvailability(month, time);
+      return NextResponse.json({ month, time, days });
+    }
+
+    if (!date || !time || !isHalfHourSlot(time)) {
       return NextResponse.json(
-        { error: "Los parámetros date y time son obligatorios." },
+        { error: "Los parámetros date y time son obligatorios y deben ser válidos." },
         { status: 400 }
       );
     }
