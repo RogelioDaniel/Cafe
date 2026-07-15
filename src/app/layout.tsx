@@ -1,20 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, IBM_Plex_Mono, Karla } from "next/font/google";
+import { Bowlby_One, IBM_Plex_Mono, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const karla = Karla({
+const nunito = Nunito_Sans({
   variable: "--font-karla",
   subsets: ["latin"],
   display: "swap",
 });
 
-const fraunces = Fraunces({
+const bowlby = Bowlby_One({
   variable: "--font-fraunces",
   subsets: ["latin"],
+  weight: "400",
   display: "swap",
-  axes: ["opsz", "SOFT", "WONK"],
 });
 
 const plexMono = IBM_Plex_Mono({
@@ -72,7 +72,7 @@ export default function RootLayout({
   return (
     <html lang="es-MX" suppressHydrationWarning>
       <body
-        className={`${karla.variable} ${fraunces.variable} ${plexMono.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
+        className={`${nunito.variable} ${bowlby.variable} ${plexMono.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
       >
         <a className="skip-link" href="#main-content">
           Saltar al contenido

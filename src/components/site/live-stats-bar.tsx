@@ -37,15 +37,15 @@ export function LiveStatsBar() {
 
   return (
     <section
-      className="bar-ticket relative border-y border-border bg-card"
+      className="bar-ticket live-poster-grid relative"
       aria-label="Estadísticas en vivo"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-2 px-4 sm:px-6 md:grid-cols-5 lg:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 py-6 sm:px-6 md:grid-cols-5 lg:px-8">
         {items.map((item) => (
           <StatChip key={item.label} {...item} />
         ))}
       </div>
-      <div className="border-t border-border bg-secondary/45 py-2 text-center font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="border-t-2 border-[#1d2059] bg-[#fff8d8] py-2 text-center font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-[#1d2059]">
         <span className="inline-flex items-center gap-2">
           <span className="coffee-bean-mark" aria-hidden="true" />
           {connected ? "La barra está reportando en vivo" : "Último corte de la barra"}
@@ -66,13 +66,13 @@ function StatChip({
   value: number | string;
 }) {
   return (
-    <div className="flex min-h-20 items-center gap-2.5 border-b border-r border-border px-3 py-4 even:border-r-0 md:border-b-0 md:border-r md:even:border-r md:last:border-r-0">
-      <Icon className="h-4 w-4 text-primary" />
+    <div className="live-poster-stat flex min-h-20 items-center gap-2.5 px-3 py-4">
+      <Icon className="h-5 w-5 shrink-0 text-[#1d2059]" strokeWidth={2.7} />
       <span>
-        <span className="block font-display text-lg font-semibold tabular-nums text-foreground">
+        <span className="block font-display text-lg tabular-nums text-[#1d2059]">
           {typeof value === "number" ? formatNumber(value) : value}
         </span>
-        <span className="block text-[11px] leading-tight text-muted-foreground">{label}</span>
+        <span className="block text-[11px] font-bold leading-tight text-[#1d2059]/75">{label}</span>
       </span>
     </div>
   );

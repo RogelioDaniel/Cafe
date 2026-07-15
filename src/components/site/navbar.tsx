@@ -32,27 +32,23 @@ export function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        scrolled
-          ? "glass-warm border-b border-border/60 shadow-sm"
-          : "bg-transparent"
-      }`}
+      className={`poster-navbar sticky top-0 z-50 w-full ${scrolled ? "is-scrolled" : ""}`}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="#inicio"
           className="group flex min-h-11 min-w-0 items-center gap-2 sm:gap-2.5"
           aria-label="Café Tonalli — inicio"
         >
-          <span className="tonalli-logo-mark relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105 sm:h-11 sm:w-11">
+          <span className="tonalli-logo-mark relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#1d2059] bg-[#f3df4d] text-[#1d2059] shadow-[3px_3px_0_#1d2059] transition-transform group-hover:-rotate-6 group-hover:scale-105 sm:h-11 sm:w-11">
             <Coffee className="h-4.5 w-4.5" strokeWidth={2.2} />
           </span>
           <span className="flex flex-col leading-none">
-            <span className="whitespace-nowrap font-display text-base font-semibold tracking-tight text-foreground sm:text-lg">
+            <span className="whitespace-nowrap font-display text-sm tracking-[-0.02em] text-[#1d2059] sm:text-base">
               Café Tonalli
             </span>
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:block">
+            <span className="hidden font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-[#1d2059]/70 sm:block">
               CDMX · Roma Norte
             </span>
           </span>
@@ -64,7 +60,7 @@ export function Navbar() {
             <Link
               key={l.href}
               href={l.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
+              className="rounded-full border-2 border-transparent px-3 py-2 text-sm font-extrabold text-[#1d2059] transition-all hover:border-[#1d2059] hover:bg-[#fff8d8]"
             >
               {l.label}
             </Link>
@@ -80,7 +76,7 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-11 w-11 hover:bg-secondary/80"
+            className="relative h-11 w-11 cursor-pointer text-[#1d2059] hover:bg-[#fff8d8]/60"
             onClick={openCart}
             aria-label={`Abrir carrito (${count} items)`}
           >
@@ -95,7 +91,7 @@ export function Navbar() {
           <Button
             asChild
             size="sm"
-            className="ml-1 hidden h-11 rounded-full bg-primary px-4 text-primary-foreground shadow-sm hover:bg-primary/90 sm:inline-flex"
+            className="poster-nav-cta ml-1 hidden h-11 cursor-pointer rounded-lg px-4 font-black sm:inline-flex"
           >
             <Link href="#reservar">Reservar</Link>
           </Button>
@@ -106,7 +102,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 md:hidden"
+                className="h-11 w-11 cursor-pointer text-[#1d2059] hover:bg-[#fff8d8]/60 md:hidden"
                 aria-label="Abrir menú"
               >
                 <Menu className="h-5 w-5" />
@@ -114,10 +110,10 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[280px] border-border bg-background p-0"
+              className="w-[min(86vw,320px)] border-l-[3px] border-[#1d2059] bg-[#fff8d8] p-0 text-[#1d2059]"
             >
-              <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
-                <SheetTitle className="font-display text-left text-xl text-foreground">
+              <SheetHeader className="border-b-2 border-[#1d2059] bg-[#f3df4d] px-5 pb-3 pt-5">
+                <SheetTitle className="font-display text-left text-xl text-[#1d2059]">
                   Menú
                 </SheetTitle>
               </SheetHeader>
@@ -127,21 +123,21 @@ export function Navbar() {
                     key={l.href}
                     href={l.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between rounded-lg px-3 py-3 text-base font-medium text-foreground transition-colors hover:bg-secondary"
+                    className="flex items-center justify-between rounded-lg border-2 border-transparent px-3 py-3 text-base font-extrabold text-[#1d2059] transition-colors hover:border-[#1d2059] hover:bg-[#b9dcff]"
                   >
                     {l.label}
                   </Link>
                 ))}
                 <Button
                   asChild
-                  className="mt-3 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="poster-button poster-button--barro mt-3 w-full font-black"
                 >
                   <Link href="#reservar" onClick={() => setMobileOpen(false)}>
                     Reservar mesa
                   </Link>
                 </Button>
-                <div className="mt-4 rounded-lg bg-secondary/60 p-3 text-xs text-muted-foreground">
-                  <p className="font-medium text-foreground">Horario hoy</p>
+                <div className="mt-4 rounded-xl border-2 border-[#1d2059] bg-[#f5b3e7] p-3 text-xs text-[#1d2059]/75 shadow-[3px_4px_0_#1d2059]">
+                  <p className="font-extrabold text-[#1d2059]">Horario hoy</p>
                   <p className="mt-1">Lun–Dom · 07:00 – 22:00</p>
                   <p className="mt-1">Av. Álvaro Obregón 142, Roma Norte</p>
                 </div>

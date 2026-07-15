@@ -23,8 +23,8 @@ export function LivePill() {
 
   return (
     <div
-      className={`hidden lg:flex items-center gap-1.5 rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-all ${
-        pulse ? "ring-2 ring-accent/30" : ""
+      className={`hidden items-center gap-1.5 rounded-full border-2 border-[#1d2059] bg-[#fff8d8] px-2.5 py-1 text-xs font-extrabold text-[#1d2059] transition-all lg:flex ${
+        pulse ? "ring-2 ring-[#f3df4d]" : ""
       }`}
       title={connected ? "Conectado en tiempo real" : "Reconectando…"}
     >

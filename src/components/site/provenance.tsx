@@ -45,26 +45,26 @@ export function Provenance() {
   return (
     <section
       id="historia"
-      className="provenance-section relative scroll-mt-20 overflow-hidden bg-[#20100a] py-20 text-[#fff5df] sm:py-28"
+      className="provenance-section relative scroll-mt-20 overflow-hidden py-20 text-[#1d2059] sm:py-28"
     >
       {/* Texture */}
       <div className="absolute inset-0 bg-grain-dark opacity-60" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="grid gap-6 border-b border-[#fff5df]/18 pb-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-end lg:text-left">
+        <div className="grid gap-6 border-b-2 border-[#1d2059]/30 pb-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-end lg:text-left">
           <div>
-          <p className="font-mono text-xs uppercase tracking-[0.22em] text-amber-300">
+          <p className="inline-flex rounded-full border-2 border-[#1d2059] bg-[#f3df4d] px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] shadow-[3px_4px_0_#1d2059]">
             Del metate a la mesa
           </p>
-          <h2 className="mt-3 font-display text-5xl font-semibold leading-[0.9] tracking-[-0.04em] sm:text-6xl">
+          <h2 className="mt-6 font-display text-4xl leading-[0.96] tracking-[-0.035em] sm:text-5xl lg:text-6xl">
             Cuatro gestos,
             <br />
-            <span className="italic text-amber-300">cuatrocientos años.</span>
+            <span className="text-[#fff8d8] drop-shadow-[3px_4px_0_#1d2059]">cuatrocientos años.</span>
           </h2>
           </div>
           <div className="max-w-xl lg:justify-self-end">
-            <p className="text-pretty text-lg leading-relaxed text-[#fff5df]/70">
+            <p className="text-pretty text-lg font-semibold leading-relaxed text-[#1d2059]/72">
               No es una cafetería más. Es un ritual que viene desde antes de que
               existiera el café en México: sembrar, tostar, moler y servir como
               una sola historia.
@@ -88,12 +88,13 @@ export function Provenance() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                data-tone={i}
                 className={`relative flex flex-col gap-8 ${
                   reversed ? "lg:flex-row-reverse" : "lg:flex-row"
                 } items-center`}
               >
                 {/* Image */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm border border-[#fff5df]/14 shadow-2xl lg:w-1/2">
+                <div className="provenance-photo relative aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] border-[3px] border-[#1d2059] lg:w-1/2">
                   <Image
                     src={step.image}
                     alt={step.caption}
@@ -102,25 +103,25 @@ export function Provenance() {
                     className="object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#20100a]/80 to-transparent p-4">
-                    <p className="font-mono text-[11px] uppercase tracking-wider text-[#fff5df]/80">
+                  <div className="absolute bottom-0 left-0 right-0 bg-[#1d2059]/88 p-4">
+                    <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#fff8d8]">
                       {step.caption}
                     </p>
                   </div>
                 </div>
 
                 {/* Text */}
-                <div className="w-full lg:w-1/2 lg:px-8">
+                <div className="provenance-copy w-full rounded-[1.5rem] border-[3px] border-[#1d2059] p-6 shadow-[7px_9px_0_#1d2059] lg:w-1/2 lg:p-8">
                   <div className="flex items-center gap-3">
-                    <span className="ritual-node flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/45 bg-[#20100a] font-mono text-xs text-amber-300 shadow-[0_0_0_8px_rgba(239,173,104,0.06)]">
+                    <span className="ritual-node flex h-14 w-14 items-center justify-center rounded-full border-[3px] border-[#1d2059] bg-[#fff8d8] font-mono text-xs font-bold text-[#1d2059] shadow-[3px_4px_0_#1d2059]">
                       {step.n}
                     </span>
-                    <step.icon className="h-6 w-6 text-amber-300" />
+                    <step.icon className="h-6 w-6 text-[#1d2059]" strokeWidth={2.7} />
                   </div>
-                  <h3 className="mt-3 font-display text-3xl font-semibold">
+                  <h3 className="mt-4 font-display text-2xl">
                     {step.title}
                   </h3>
-                  <p className="mt-3 text-pretty text-lg leading-relaxed text-[#fff5df]/75">
+                  <p className="mt-3 text-pretty text-base font-semibold leading-relaxed text-[#1d2059]/72 sm:text-lg">
                     {step.body}
                   </p>
                 </div>

@@ -66,40 +66,40 @@ export function CoffeeRitual() {
       ref={sectionRef}
       id="ritual-barro"
       aria-labelledby="ritual-title"
-      className="coffee-ritual relative overflow-hidden bg-[#2a120b] text-[#fff5df]"
+      className="coffee-ritual relative overflow-hidden text-[#1d2059]"
     >
       <div className="coffee-ritual__grain" aria-hidden="true" />
       <div className="coffee-ritual__inner relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-16 lg:px-8">
         <div className="relative z-10">
-          <p className="font-mono text-xs uppercase tracking-[0.22em] text-amber-300">
+          <p className="ritual-kicker inline-flex rounded-full border-2 border-[#1d2059] bg-[#f3df4d] px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] shadow-[3px_4px_0_#1d2059]">
             La pieza de la casa
           </p>
           <h2
             id="ritual-title"
-            className="mt-4 max-w-xl font-display text-5xl font-semibold leading-[0.9] tracking-[-0.04em] sm:text-6xl"
+            className="mt-6 max-w-xl font-display text-4xl leading-[0.96] tracking-[-0.035em] sm:text-5xl lg:text-6xl"
           >
             El barro guarda
             <br />
-            <span className="italic text-[#edaa66]">el último calor.</span>
+            <span className="text-[#fff8d8] drop-shadow-[3px_4px_0_#1d2059]">el último calor.</span>
           </h2>
-          <p className="mt-6 max-w-lg text-pretty text-lg leading-relaxed text-[#fff5df]/70">
+          <p className="mt-6 max-w-lg text-pretty text-lg font-semibold leading-relaxed text-[#1d2059]/75">
             La taza no es utilería: termina la receta. Su pared de barro mantiene
             el café de olla caliente mientras la canela, el piloncillo y el grano
             de altura se encuentran.
           </p>
 
-          <ol className="mt-10 border-t border-[#fff5df]/14">
+          <ol className="mt-10 border-t-2 border-[#1d2059]/35">
             {RITUAL_NOTES.map(([number, title, description]) => (
               <li
                 key={number}
-                className="grid grid-cols-[2.5rem_1fr] gap-3 border-b border-[#fff5df]/14 py-4"
+                className="grid grid-cols-[2.5rem_1fr] gap-3 border-b-2 border-[#1d2059]/25 py-4"
               >
-                <span className="pt-1 font-mono text-[10px] text-amber-300">
+                <span className="pt-1 font-mono text-[10px] font-bold text-[#1d2059]">
                   {number}
                 </span>
                 <div>
                   <h3 className="font-display text-xl font-semibold">{title}</h3>
-                  <p className="mt-1 text-base leading-relaxed text-[#fff5df]/58 sm:text-sm">
+                  <p className="mt-1 text-base font-semibold leading-relaxed text-[#1d2059]/64 sm:text-sm">
                     {description}
                   </p>
                 </div>

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCafeStats } from "@/hooks/use-cafe-stats";
 import { toast } from "sonner";
+import { TonalliCupDoodle } from "./tonalli-doodles";
 
 const TIMES = [
   "07:00", "07:30", "08:00", "08:30", "09:00", "09:30",
@@ -223,27 +224,28 @@ export function Reservation() {
   }
 
   return (
-    <section id="reservar" className="reservation-section relative scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
+    <section id="reservar" className="reservation-section relative scroll-mt-20 py-20 sm:py-28">
+      <TonalliCupDoodle className="reservation-doodle" />
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid min-w-0 gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Left — copy + live info */}
           <div className="min-w-0">
-            <p className="font-mono text-xs uppercase tracking-[0.22em] text-primary">
+            <p className="inline-flex rounded-full border-2 border-[#1d2059] bg-[#48c778] px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[#1d2059] shadow-[3px_4px_0_#1d2059]">
               Reservación
             </p>
-            <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+            <h2 className="mt-6 font-display text-4xl leading-[0.98] tracking-[-0.035em] text-[#1d2059] sm:text-5xl">
               Aparta tu mesa
               <br />
-              <span className="italic text-primary">en 30 segundos.</span>
+              <span className="text-[#e7642d] drop-shadow-[2px_3px_0_#1d2059]">en 30 segundos.</span>
             </h2>
-            <p className="mt-4 text-pretty text-muted-foreground">
+            <p className="mt-5 max-w-xl text-pretty font-semibold leading-relaxed text-[#1d2059]/72">
               Sin llamadas, sin esperas. Elige día, hora y zona; te confirmamos
               al instante. Para grupos de 8 o más, escríbenos por WhatsApp.
             </p>
 
             {/* Live availability cards */}
             <div className="mt-8 grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="reservation-live-card rounded-xl border-[3px] border-[#1d2059] bg-[#f3df4d] p-4 shadow-[4px_5px_0_#1d2059]">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
@@ -256,7 +258,7 @@ export function Reservation() {
                 </div>
                 <div className="text-xs text-muted-foreground">de 12 en este momento</div>
               </div>
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="reservation-live-card rounded-xl border-[3px] border-[#1d2059] bg-[#b9dcff] p-4 shadow-[4px_5px_0_#1d2059]">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" /> Espera aprox.
                 </div>
@@ -268,7 +270,7 @@ export function Reservation() {
             </div>
 
             {/* Address card */}
-            <div className="mt-4 rounded-xl border border-border bg-card p-4">
+            <div className="reservation-address mt-4 rounded-xl border-[3px] border-[#1d2059] bg-[#f5b3e7] p-4 shadow-[4px_5px_0_#1d2059]">
               <div className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 text-primary" />
                 <div>
@@ -287,7 +289,7 @@ export function Reservation() {
           {/* Right — form */}
           <form
             onSubmit={submit}
-            className="reservation-ticket -mx-2 min-w-0 rounded-2xl border border-border bg-card p-4 shadow-lg sm:mx-0 sm:p-8"
+            className="reservation-ticket -mx-2 min-w-0 rounded-[1.5rem] border-[3px] border-[#1d2059] bg-[#fff8d8] p-4 sm:mx-0 sm:p-8"
           >
             <div className="reservation-folio" aria-hidden="true">
               <span>Comanda de mesa</span>
@@ -578,7 +580,7 @@ export function Reservation() {
             <Button
               type="submit"
               disabled={submitting || availability?.slotsLeft === 0}
-              className="tonalli-press mt-5 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="tonalli-press poster-button poster-button--barro mt-5 w-full font-black"
               size="lg"
             >
               {submitting ? (

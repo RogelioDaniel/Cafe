@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Review } from "@/lib/types";
+import { TonalliConchaDoodle } from "./tonalli-doodles";
 
 const SOURCE_LABELS: Record<string, string> = {
   google: "Google",
@@ -21,119 +21,127 @@ export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
 
   useEffect(() => {
     if (!auto || reduceMotion || reviews.length === 0) return;
-    const t = setInterval(() => {
-      setIdx((i) => (i + 1) % reviews.length);
+    const timer = setInterval(() => {
+      setIdx((current) => (current + 1) % reviews.length);
     }, 6000);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, [auto, reduceMotion, reviews.length]);
 
   if (reviews.length === 0) return null;
 
-  const current = reviews[idx];
+  const visibleReviews = Array.from(
+    { length: Math.min(3, reviews.length) },
+    (_, offset) => reviews[(idx + offset) % reviews.length]
+  );
 
   return (
-    <section className="sobremesa-section relative overflow-hidden bg-background py-20 sm:py-28">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-5 border-b border-foreground/18 pb-8 sm:grid-cols-[1fr_auto] sm:items-end sm:text-left">
+    <section className="sobremesa-section relative overflow-hidden py-20 sm:py-28">
+      <TonalliConchaDoodle className="testimonial-doodle" />
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-5 border-b-2 border-[#fff8d8]/25 pb-8 sm:grid-cols-[1fr_auto] sm:items-end sm:text-left">
           <div>
-          <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-primary">
-            <span className="coffee-bean-mark" aria-hidden="true" />
-            Lo que dice la gente
-          </p>
-          <h2 className="mt-3 font-display text-5xl font-semibold leading-[0.94] tracking-[-0.04em] text-foreground sm:text-6xl">
-            Sobremesas que
-            <br />
-            <span className="font-normal italic text-primary">se vuelven reseñas.</span>
-          </h2>
+            <p className="flex items-center gap-3 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[#f3df4d]">
+              <span className="coffee-bean-mark" aria-hidden="true" />
+              Lo que dice la gente
+            </p>
+            <h2 className="mt-4 font-display text-4xl leading-[0.98] tracking-[-0.035em] text-[#fff8d8] sm:text-5xl lg:text-6xl">
+              Sobremesas que
+              <br />
+              <span className="text-[#f3df4d]">se vuelven reseñas.</span>
+            </h2>
           </div>
           <div className="sm:text-right">
-          <div className="flex items-center gap-1 sm:justify-end">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className="h-5 w-5 fill-amber-400 text-amber-400" />
-            ))}
-          </div>
-          <p className="mt-2 font-display text-2xl font-semibold text-foreground">4.9 de 5</p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">2,849 reseñas</p>
+            <div className="flex items-center gap-1 sm:justify-end">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} className="h-5 w-5 fill-[#f3df4d] text-[#f3df4d]" />
+              ))}
+            </div>
+            <p className="mt-2 font-display text-2xl text-[#fff8d8]">4.9 de 5</p>
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#fff8d8]/62">
+              2,849 reseñas
+            </p>
           </div>
         </div>
 
-        {/* Featured review */}
         <div
-          className="coffee-note relative mt-12 overflow-hidden rounded-sm border border-border bg-card p-8 shadow-[0_18px_50px_rgba(70,31,15,0.08)] sm:p-12"
+          className="mt-12"
           onMouseEnter={() => setAuto(false)}
           onMouseLeave={() => setAuto(true)}
           onFocusCapture={() => setAuto(false)}
           onBlurCapture={() => setAuto(true)}
         >
-          <Quote className="absolute right-6 top-6 h-16 w-16 text-primary/8" />
-
           <AnimatePresence mode="wait">
             <motion.div
-              key={current.id}
+              key={idx}
               initial={reduceMotion ? false : { opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
+              exit={{ opacity: 0, y: -18 }}
+              transition={{ duration: 0.42 }}
+              className="grid gap-5 md:grid-cols-3"
+              aria-live="polite"
             >
-              <div className="flex items-center gap-1">
-                {Array.from({ length: current.rating }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <blockquote className="mt-4 font-display text-2xl font-medium leading-relaxed text-foreground sm:text-3xl">
-                “{current.comment}”
-              </blockquote>
-              <div className="mt-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 font-display text-lg font-semibold text-primary">
-                    {current.name.charAt(0)}
+              {visibleReviews.map((review, offset) => (
+                <article
+                  className={`coffee-note testimonial-card testimonial-card--${offset + 1} relative flex min-h-[22rem] flex-col overflow-hidden rounded-[1.45rem] border-[3px] border-[#1d2059] p-6 text-[#1d2059] shadow-[7px_9px_0_#0d103d] sm:p-7`}
+                  key={`${review.id}-${offset}`}
+                >
+                  <Quote className="absolute right-5 top-5 h-12 w-12 opacity-15" />
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: review.rating }).map((_, star) => (
+                      <Star key={star} className="h-4 w-4 fill-[#1d2059] text-[#1d2059]" />
+                    ))}
                   </div>
-                  <div>
-                    <p className="font-medium text-foreground">{current.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      vía {SOURCE_LABELS[current.source] ?? current.source}
-                    </p>
+                  <blockquote className="mt-6 font-display text-xl leading-[1.25] sm:text-2xl">
+                    “{review.comment}”
+                  </blockquote>
+                  <div className="mt-auto flex items-center gap-3 pt-7">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#1d2059] bg-[#fff8d8] font-display text-base shadow-[2px_3px_0_#1d2059]">
+                      {review.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-extrabold">{review.name}</p>
+                      <p className="text-xs font-semibold text-[#1d2059]/65">
+                        vía {SOURCE_LABELS[review.source] ?? review.source}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-11 w-11 rounded-full"
-                    onClick={() => setIdx((i) => (i - 1 + reviews.length) % reviews.length)}
-                    aria-label="Reseña anterior"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-11 w-11 rounded-full"
-                    onClick={() => setIdx((i) => (i + 1) % reviews.length)}
-                    aria-label="Siguiente reseña"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+                </article>
+              ))}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Dots */}
-        <div className="mt-4 flex justify-center gap-0.5">
-          {reviews.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setIdx(i)}
-              className="group flex h-11 w-11 cursor-pointer items-center justify-center rounded-full"
-              aria-label={`Ir a reseña ${i + 1}`}
-            >
-              <span className={`block h-1.5 rounded-full transition-all ${
-                i === idx ? "w-6 bg-primary" : "w-1.5 bg-border group-hover:bg-primary/40"
-              }`} />
-            </button>
-          ))}
+        <div className="mt-7 flex items-center justify-center gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            className="testimonial-control h-11 w-11 cursor-pointer rounded-full"
+            onClick={() => setIdx((current) => (current - 1 + reviews.length) % reviews.length)}
+            aria-label="Reseña anterior"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex gap-1">
+            {reviews.map((_, reviewIndex) => (
+              <button
+                key={reviewIndex}
+                onClick={() => setIdx(reviewIndex)}
+                className="group flex h-11 w-8 cursor-pointer items-center justify-center rounded-full"
+                aria-label={`Ir a reseña ${reviewIndex + 1}`}
+              >
+                <span className={`block h-2 rounded-full border border-[#fff8d8]/35 transition-all ${reviewIndex === idx ? "w-6 bg-[#f3df4d]" : "w-2 bg-[#fff8d8]/35 group-hover:bg-[#fff8d8]/70"}`} />
+              </button>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="testimonial-control h-11 w-11 cursor-pointer rounded-full"
+            onClick={() => setIdx((current) => (current + 1) % reviews.length)}
+            aria-label="Siguiente reseña"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </section>

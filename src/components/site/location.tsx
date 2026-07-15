@@ -3,6 +3,7 @@
 import { MapPin, Clock, Phone, Instagram, Facebook, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { TonalliOllaDoodle } from "./tonalli-doodles";
 
 const HOURS = [
   { day: "Lunes", hours: "07:00 – 22:00" },
@@ -23,21 +24,22 @@ export function LocationSection() {
   const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 
   return (
-    <section id="ubicacion" className="location-section relative scroll-mt-20 overflow-hidden bg-secondary/40 py-20 sm:py-28">
+    <section id="ubicacion" className="location-section relative scroll-mt-20 overflow-hidden py-20 sm:py-28">
       <div className="azulejo-trim" aria-hidden="true" />
+      <TonalliOllaDoodle className="location-doodle" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.22em] text-primary">
+          <p className="inline-flex rounded-full border-2 border-[#1d2059] bg-[#f3df4d] px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[#1d2059] shadow-[3px_4px_0_#1d2059]">
             Ven a vernos
           </p>
-          <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          <h2 className="mt-6 font-display text-4xl leading-[0.98] tracking-[-0.035em] text-[#1d2059] drop-shadow-[3px_4px_0_#fff8d8] sm:text-5xl lg:text-6xl">
             En el corazón de la Roma
           </h2>
         </div>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
           {/* Map / interior image */}
-          <div className="location-postcard relative aspect-[4/3] overflow-hidden rounded-2xl border border-border shadow-lg">
+          <div className="location-postcard relative aspect-[4/3] overflow-hidden rounded-[1.6rem] border-[3px] border-[#1d2059] shadow-[9px_11px_0_#1d2059]">
             <Image
               src="/images/interior/cafe-interior.png"
               alt="Interior cálido de Café Tonalli en Roma Norte con mesas de madera, lámparas de cobre y papel picado"
@@ -48,7 +50,7 @@ export function LocationSection() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#170b07]/70 via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-[#fff5df]">
-              <p className="font-display text-2xl font-semibold">Café Tonalli</p>
+              <p className="font-display text-2xl">Café Tonalli</p>
               <p className="text-sm text-[#fff5df]/80">
                 Av. Álvaro Obregón 142, Roma Norte
               </p>
@@ -58,10 +60,10 @@ export function LocationSection() {
           {/* Info */}
           <div className="flex flex-col gap-6">
             {/* Address */}
-            <div className="location-tile rounded-2xl border border-border bg-card p-6">
+            <div className="location-tile rounded-[1.35rem] border-[3px] border-[#1d2059] bg-[#f5b3e7] p-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <MapPin className="h-5 w-5 text-primary" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#1d2059] bg-[#fff8d8] shadow-[2px_3px_0_#1d2059]">
+                  <MapPin className="h-5 w-5 text-[#1d2059]" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display text-lg font-semibold text-foreground">
@@ -78,7 +80,7 @@ export function LocationSection() {
                     asChild
                     size="sm"
                     variant="outline"
-                    className="mt-3 rounded-full"
+                    className="poster-button poster-button--cream mt-3 font-black"
                   >
                     <a
                       href="https://www.google.com/maps/search/?api=1&query=Av.+%C3%81lvaro+Obreg%C3%B3n+142,+Roma+Norte,+CDMX"
@@ -93,10 +95,10 @@ export function LocationSection() {
             </div>
 
             {/* Hours */}
-            <div className="location-tile rounded-2xl border border-border bg-card p-6">
+            <div className="location-tile rounded-[1.35rem] border-[3px] border-[#1d2059] bg-[#b9dcff] p-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <Clock className="h-5 w-5 text-primary" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#1d2059] bg-[#fff8d8] shadow-[2px_3px_0_#1d2059]">
+                  <Clock className="h-5 w-5 text-[#1d2059]" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display text-lg font-semibold text-foreground">
@@ -135,10 +137,10 @@ export function LocationSection() {
             </div>
 
             {/* Contact */}
-            <div className="location-tile rounded-2xl border border-border bg-card p-6">
+            <div className="location-tile rounded-[1.35rem] border-[3px] border-[#1d2059] bg-[#efad43] p-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <Phone className="h-5 w-5 text-primary" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-[#1d2059] bg-[#fff8d8] shadow-[2px_3px_0_#1d2059]">
+                  <Phone className="h-5 w-5 text-[#1d2059]" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display text-lg font-semibold text-foreground">
@@ -150,7 +152,7 @@ export function LocationSection() {
                     </a>
                   </p>
                   <div className="mt-3 flex gap-2">
-                    <Button asChild size="sm" variant="outline" className="rounded-full">
+                    <Button asChild size="sm" variant="outline" className="poster-icon-button rounded-full">
                       <a
                         href="https://instagram.com"
                         target="_blank"
@@ -160,7 +162,7 @@ export function LocationSection() {
                         <Instagram className="h-4 w-4" />
                       </a>
                     </Button>
-                    <Button asChild size="sm" variant="outline" className="rounded-full">
+                    <Button asChild size="sm" variant="outline" className="poster-icon-button rounded-full">
                       <a
                         href="https://facebook.com"
                         target="_blank"

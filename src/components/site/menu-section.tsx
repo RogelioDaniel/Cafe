@@ -10,6 +10,7 @@ import { useCart } from "@/lib/cart-store";
 import { formatMXN } from "@/lib/format";
 import { toast } from "sonner";
 import type { MenuCategoryGroup, MenuItem, MenuCategory } from "@/lib/types";
+import { TonalliBeanDoodle, TonalliConchaDoodle } from "./tonalli-doodles";
 
 interface MenuSectionProps {
   categories: MenuCategoryGroup[];
@@ -55,27 +56,28 @@ export function MenuSection({ categories }: MenuSectionProps) {
   const totalItems = categories.reduce((a, c) => a + c.items.length, 0);
 
   return (
-    <section id="menu" className="menu-section relative scroll-mt-20 overflow-hidden bg-background py-20 sm:py-28">
-      <div className="menu-stain pointer-events-none absolute -right-32 top-32 h-96 w-96 opacity-30" aria-hidden="true" />
+    <section id="menu" className="menu-section relative scroll-mt-20 overflow-hidden py-20 sm:py-28">
+      <TonalliConchaDoodle className="menu-doodle menu-doodle--concha" />
+      <TonalliBeanDoodle className="menu-doodle menu-doodle--bean" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="relative grid items-end gap-7 border-b border-foreground/20 pb-9 lg:grid-cols-[1fr_0.72fr]">
+        <div className="relative grid items-end gap-7 border-b-2 border-[#fff8d8]/35 pb-9 lg:grid-cols-[1fr_0.72fr]">
           <div className="menu-order-slip" aria-hidden="true">
             <span>Comanda de la casa</span>
             <strong>Barra abierta · 07:00</strong>
           </div>
           <div>
-            <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-primary">
+            <p className="flex items-center gap-3 font-mono text-xs font-semibold uppercase tracking-[0.22em] text-[#f3df4d]">
               <span className="coffee-bean-mark" aria-hidden="true" />
               La carta
             </p>
-            <h2 className="mt-4 max-w-3xl font-display text-5xl font-semibold leading-[0.92] tracking-[-0.04em] text-foreground sm:text-6xl lg:text-7xl">
+            <h2 className="mt-4 max-w-3xl font-display text-4xl leading-[0.96] tracking-[-0.035em] text-[#fff8d8] sm:text-5xl lg:text-6xl">
               Antojos hechos
               <br />
-              <span className="font-normal italic text-primary">al ritmo del comal.</span>
+              <span className="text-[#f3df4d]">al ritmo del comal.</span>
             </h2>
           </div>
-          <p className="max-w-xl text-pretty text-base leading-relaxed text-muted-foreground lg:pb-1 lg:text-lg">
+          <p className="max-w-xl text-pretty text-base font-semibold leading-relaxed text-[#fff8d8]/72 lg:pb-1 lg:text-lg">
             Café tostado cada mañana, masa nixtamalizada en casa y pan dulce
             que sale antes de que el barrio abra los ojos. Cada ingrediente
             dice de dónde viene.
@@ -108,7 +110,7 @@ export function MenuSection({ categories }: MenuSectionProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar en el menú… (ej. café, tamal, picante)"
-            className="w-full max-w-md rounded-full border border-border bg-card px-5 py-2.5 text-sm text-foreground shadow-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="menu-search w-full max-w-md rounded-xl border-2 border-[#1d2059] bg-[#fff8d8] px-5 py-3 text-sm font-bold text-[#1d2059] shadow-[4px_5px_0_#0d103d] outline-none transition-all placeholder:text-[#1d2059]/55 focus:-translate-y-0.5 focus:ring-2 focus:ring-[#f3df4d]"
             aria-label="Buscar en el menú"
           />
         </div>
@@ -136,12 +138,12 @@ export function MenuSection({ categories }: MenuSectionProps) {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <div className="mb-6 flex items-baseline justify-between border-b border-foreground/20 pb-3">
-                    <h3 className="flex items-center gap-3 font-display text-2xl font-semibold text-foreground sm:text-3xl">
+                  <div className="mb-6 flex items-baseline justify-between border-b-2 border-[#fff8d8]/25 pb-3">
+                    <h3 className="flex items-center gap-3 font-display text-xl text-[#f3df4d] sm:text-2xl">
                       <span className="coffee-bean-mark" aria-hidden="true" />
                       {cat.name}
                     </h3>
-                    <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#fff8d8]/62">
                       {cat.items.length} {cat.items.length === 1 ? "opción" : "opciones"}
                     </span>
                   </div>
@@ -172,10 +174,10 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`menu-filter min-h-11 cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+      className={`menu-filter min-h-11 cursor-pointer rounded-full border-2 border-[#1d2059] px-4 py-2 text-sm font-extrabold text-[#1d2059] shadow-[3px_4px_0_#0d103d] transition-all ${
         active
-          ? "border-primary bg-primary text-primary-foreground shadow-sm"
-          : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+          ? "bg-[#f3df4d]"
+          : "bg-[#fff8d8] hover:-translate-y-0.5 hover:bg-[#f5b3e7]"
       }`}
     >
       {children}
@@ -203,9 +205,9 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
   }
 
   return (
-    <article className="menu-ticket group relative flex flex-col overflow-hidden rounded-sm border border-border border-b-primary/35 bg-card shadow-[0_12px_30px_rgba(70,31,15,0.06)] transition-[border-color,box-shadow] duration-300 hover:border-primary/45 hover:shadow-[0_18px_38px_rgba(70,31,15,0.11)]">
+    <article className="menu-ticket group relative flex flex-col overflow-hidden rounded-[1.35rem] border-[3px] border-[#1d2059] bg-card shadow-[7px_9px_0_#0d103d] transition-transform duration-300 hover:-translate-y-1.5">
       {/* Image */}
-      <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
+      <div className="relative aspect-[5/4] overflow-hidden border-b-[3px] border-[#1d2059] bg-secondary">
         {item.image ? (
           <Image
             src={item.image}
@@ -230,7 +232,7 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-4">
+        <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-2">
           <h4 className="font-display text-lg font-semibold leading-tight text-foreground">
             {item.name}
@@ -273,9 +275,9 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
 
         {/* CTA */}
         <div className="mt-4 pt-1">
-          <Button
-            onClick={addToOrder}
-            className="tonalli-press relative min-h-11 w-full cursor-pointer overflow-hidden rounded-md bg-primary/95 text-primary-foreground transition-colors hover:bg-primary"
+            <Button
+              onClick={addToOrder}
+              className="tonalli-press menu-card-button relative min-h-11 w-full cursor-pointer overflow-hidden rounded-lg border-2 border-[#1d2059] bg-[#1d2059] font-extrabold text-[#fff8d8] shadow-[3px_4px_0_rgba(13,16,61,0.45)] transition-all hover:bg-[#343878]"
             size="sm"
             aria-live="polite"
           >

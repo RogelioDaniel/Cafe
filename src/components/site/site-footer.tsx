@@ -5,6 +5,7 @@ import { Coffee, Mail, Instagram, Facebook, Send, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { TonalliBeanDoodle, TonalliConchaDoodle, TonalliCupDoodle } from "./tonalli-doodles";
 
 export function SiteFooter() {
   const [email, setEmail] = useState("");
@@ -26,37 +27,40 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="tonalli-footer relative mt-auto bg-[#170b07] text-[#fff5df]">
+    <footer className="tonalli-footer relative mt-auto bg-[#1f7df0] text-[#fff8d8]">
       <div className="footer-papel-trim" aria-hidden="true" />
       {/* Newsletter band */}
-      <div className="border-b border-[#fff5df]/10">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="border-b-[3px] border-[#1d2059] bg-[#1d2059]">
+        <div className="footer-newsletter-panel relative mx-auto max-w-6xl px-5 py-10 sm:px-8 lg:px-10">
+          <TonalliBeanDoodle className="footer-doodle footer-doodle--bean" />
+          <TonalliCupDoodle className="footer-doodle footer-doodle--cup" />
+          <TonalliConchaDoodle className="footer-doodle footer-doodle--concha" />
           <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
             <div className="max-w-md">
-              <h3 className="font-display text-2xl font-semibold sm:text-3xl">
+              <h3 className="font-display text-2xl text-[#1d2059] sm:text-3xl">
                 Noticias del comal
               </h3>
-              <p className="mt-2 text-sm text-[#fff5df]/70">
+              <p className="mt-2 max-w-lg text-sm font-semibold text-[#1d2059]/70">
                 Recetas, eventos y nuevos cafés de temporada. Una vez al mes, sin
                 ruido.
               </p>
             </div>
             <form onSubmit={subscribe} className="flex w-full max-w-md gap-2">
               <div className="relative flex-1">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#fff5df]/40" />
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1d2059]/55" />
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tucorreo@ejemplo.com"
-                  className="border-[#fff5df]/20 bg-[#fff5df]/5 pl-9 text-[#fff5df] placeholder:text-[#fff5df]/40 focus:border-amber-400 focus:ring-amber-400/20"
+                  className="h-11 border-2 border-[#1d2059] bg-[#fffdf1] pl-9 font-semibold text-[#1d2059] placeholder:text-[#1d2059]/45 focus:ring-[#1d2059]/20"
                   autoComplete="email"
                 />
               </div>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="rounded-full bg-amber-500 text-foreground hover:bg-amber-400"
+                className="h-11 w-11 cursor-pointer rounded-lg border-2 border-[#1d2059] bg-[#e7642d] text-[#1d2059] shadow-[3px_4px_0_#1d2059] hover:bg-[#f26d9d]"
               >
                 <Send className="h-4 w-4" />
                 <span className="sr-only">Suscribirme</span>
@@ -72,11 +76,11 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500 text-foreground">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#1d2059] bg-[#f3df4d] text-[#1d2059] shadow-[2px_3px_0_#1d2059]">
                 <Coffee className="h-4.5 w-4.5" strokeWidth={2.2} />
               </span>
               <span className="flex flex-col leading-none">
-                <span className="font-display text-lg font-semibold">
+                <span className="font-display text-lg">
                   Café Tonalli
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#fff5df]/50">
