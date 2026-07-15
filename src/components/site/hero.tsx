@@ -1,34 +1,95 @@
 "use client";
 
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { ArrowDownRight, Clock, MapPin, Star } from "lucide-react";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCafeStats } from "@/hooks/use-cafe-stats";
 import { formatNumber } from "@/lib/format";
 import {
   TonalliBeanDoodle,
+  TonalliCinnamonDoodle,
   TonalliConchaDoodle,
   TonalliCupDoodle,
+  TonalliMolinilloDoodle,
   TonalliOllaDoodle,
+  TonalliPiloncilloDoodle,
+  TonalliTamalDoodle,
+  type TonalliDoodleProps,
 } from "./tonalli-doodles";
 
 const CAFE_LETTERS = ["C", "A", "F", "É"];
 const TONALLI_LETTERS = ["T", "O", "N", "A", "L", "L", "I"];
 
+const HERO_CHARACTERS = {
+  bean: TonalliBeanDoodle,
+  cinnamon: TonalliCinnamonDoodle,
+  concha: TonalliConchaDoodle,
+  cup: TonalliCupDoodle,
+  molinillo: TonalliMolinilloDoodle,
+  olla: TonalliOllaDoodle,
+  piloncillo: TonalliPiloncilloDoodle,
+  tamal: TonalliTamalDoodle,
+} satisfies Record<string, ComponentType<TonalliDoodleProps>>;
+
+type CharacterId = keyof typeof HERO_CHARACTERS;
+type CharacterSlot = "lead" | "left" | "right" | "accent";
+type HeroCast = Record<CharacterSlot, CharacterId> & { ariaLabel: string };
+
+const HERO_CASTS: HeroCast[] = [
+  { lead: "olla", left: "concha", right: "cup", accent: "bean", ariaLabel: "Olla, concha, taza y grano de café caricaturizados" },
+  { lead: "molinillo", left: "tamal", right: "piloncillo", accent: "cinnamon", ariaLabel: "Molinillo, tamal, piloncillo y canela caricaturizados" },
+  { lead: "cup", left: "bean", right: "concha", accent: "tamal", ariaLabel: "Taza, grano, concha y tamal caricaturizados" },
+  { lead: "olla", left: "cinnamon", right: "piloncillo", accent: "molinillo", ariaLabel: "Olla, canela, piloncillo y molinillo caricaturizados" },
+  { lead: "molinillo", left: "concha", right: "cup", accent: "bean", ariaLabel: "Molinillo, concha, taza y grano de café caricaturizados" },
+  { lead: "cup", left: "tamal", right: "cinnamon", accent: "piloncillo", ariaLabel: "Taza, tamal, canela y piloncillo caricaturizados" },
+];
+
+const CHARACTER_SLOTS: CharacterSlot[] = ["lead", "left", "right", "accent"];
+
 export function Hero() {
   const { state } = useCafeStats();
+  const sectionRef = useRef<HTMLElement>(null);
+  const [castIndex, setCastIndex] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const copyY = useTransform(scrollYProgress, [0, 0.12, 0.82], [0, 0, -140]);
+  const copyOpacity = useTransform(scrollYProgress, [0, 0.52, 0.86], [1, 0.84, 0]);
+  const visualY = useTransform(scrollYProgress, [0, 0.1, 0.92], [0, 0, -190]);
+  const visualOpacity = useTransform(scrollYProgress, [0, 0.64, 0.94], [1, 0.88, 0]);
+  const leadY = useTransform(scrollYProgress, [0, 0.16, 0.9], [0, 0, -115]);
+  const leftY = useTransform(scrollYProgress, [0, 0.12, 0.86], [0, 0, -205]);
+  const rightY = useTransform(scrollYProgress, [0, 0.14, 0.88], [0, 0, -175]);
+  const accentY = useTransform(scrollYProgress, [0, 0.08, 0.82], [0, 0, -235]);
+
+  useEffect(() => {
+    const randomValue = new Uint32Array(1);
+    window.crypto.getRandomValues(randomValue);
+    setCastIndex(randomValue[0] % HERO_CASTS.length);
+  }, []);
+
+  const cast = HERO_CASTS[castIndex];
 
   return (
     <section
+      ref={sectionRef}
       id="inicio"
-      className="tonalli-hero relative isolate min-h-[calc(100dvh-4rem)] overflow-hidden text-[#1d2059]"
+      className="tonalli-hero relative isolate overflow-hidden text-[#1d2059]"
     >
       <div className="hero-poster-dots" aria-hidden="true" />
       <span className="hero-spark hero-spark--one" aria-hidden="true" />
       <span className="hero-spark hero-spark--two" aria-hidden="true" />
 
-      <div className="relative mx-auto grid min-h-[calc(100dvh-4rem)] max-w-[1440px] items-center gap-8 px-5 pb-14 pt-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-12 lg:pb-12 lg:pt-10">
-        <div className="hero-copy relative z-10 max-w-2xl py-6 lg:py-10">
+      <div className="hero-layout relative mx-auto grid max-w-[1440px] items-center gap-8 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-12">
+        <motion.div
+          className="hero-scroll-layer hero-scroll-layer--copy"
+          style={shouldReduceMotion ? undefined : { y: copyY, opacity: copyOpacity }}
+        >
+        <div className="hero-copy relative z-10 max-w-2xl">
           <div className="hero-reveal hero-reveal--eyebrow hero-eyebrow-badge">
             <span className="coffee-bean-mark" aria-hidden="true" />
             Café mexicano · Roma Norte
@@ -91,19 +152,35 @@ export function Hero() {
             </span>
           </div>
         </div>
+        </motion.div>
 
+        <motion.div
+          className="hero-scroll-layer hero-scroll-layer--visual"
+          style={shouldReduceMotion ? undefined : { y: visualY, opacity: visualOpacity }}
+        >
         <div className="hero-service relative mx-auto w-full max-w-[46rem] lg:justify-self-end">
           <div
             className="hero-cartoon-stage"
             role="img"
-            aria-label="Olla, taza, concha y grano de café ilustrados como personajes de Café Tonalli"
+            aria-label={`${cast.ariaLabel} como personajes de Café Tonalli`}
           >
             <div className="hero-sunburst" aria-hidden="true" />
             <div className="hero-checker-table" aria-hidden="true" />
-            <TonalliOllaDoodle className="hero-doodle hero-doodle--olla" />
-            <TonalliCupDoodle className="hero-doodle hero-doodle--cup" />
-            <TonalliConchaDoodle className="hero-doodle hero-doodle--concha" />
-            <TonalliBeanDoodle className="hero-doodle hero-doodle--bean" />
+            {CHARACTER_SLOTS.map((slot) => {
+              const characterId = cast[slot];
+              const Character = HERO_CHARACTERS[characterId];
+              const characterY = slot === "lead" ? leadY : slot === "left" ? leftY : slot === "right" ? rightY : accentY;
+              return (
+                <motion.div
+                  className={`hero-character hero-character--${slot}`}
+                  data-character={characterId}
+                  key={`${castIndex}-${slot}-${characterId}`}
+                  style={shouldReduceMotion ? undefined : { y: characterY }}
+                >
+                  <Character className="hero-character__art" />
+                </motion.div>
+              );
+            })}
             <div className="hero-kitchen-ticket">
               <p>Receta de la casa</p>
               <strong>Olla · canela · piloncillo</strong>
@@ -121,6 +198,7 @@ export function Hero() {
             <HeroStat label="Espera" value={`${state?.wait_time_minutes ?? 8} min`} />
           </div>
         </div>
+        </motion.div>
       </div>
     </section>
   );

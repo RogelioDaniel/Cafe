@@ -12,7 +12,7 @@ import { CartDrawer } from "@/components/site/cart-drawer";
 import { AIBarista } from "@/components/site/ai-barista";
 import { CoffeeIntro } from "@/components/site/coffee-intro";
 import { CoffeeRitual } from "@/components/site/coffee-ritual";
-import { BrandMarquee } from "@/components/site/brand-marquee";
+import { CoffeeSectionTransition } from "@/components/site/coffee-section-transition";
 import type { MenuCategoryGroup, MenuItem, MenuCategory, Review } from "@/lib/types";
 
 const CATEGORY_NAMES: Record<MenuCategory, string> = {
@@ -93,14 +93,17 @@ export default async function Home() {
           <main id="main-content" className="flex-1">
             <Hero />
             <LiveStatsBar />
-            <BrandMarquee />
+            <CoffeeSectionTransition from="maiz" to="noche" label="La carta sale al comal" />
             <MenuSection categories={categories} />
+            <CoffeeSectionTransition from="noche" to="barro" label="El barro guarda el calor" />
             <CoffeeRitual />
-            <BrandMarquee tone="barro" />
+            <CoffeeSectionTransition from="barro" to="azul" label="Del metate a la memoria" />
             <Provenance />
+            <CoffeeSectionTransition from="azul" to="crema" label="Aparta tu sobremesa" />
             <Reservation />
-            <BrandMarquee tone="bugambilia" />
+            <CoffeeSectionTransition from="crema" to="noche" label="Lo cuenta la colonia" />
             <Testimonials initialReviews={initialReviews} />
+            <CoffeeSectionTransition from="noche" to="hoja" label="Nos vemos en la Roma" />
             <LocationSection />
           </main>
           <SiteFooter />

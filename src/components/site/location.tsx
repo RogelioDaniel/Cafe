@@ -123,7 +123,7 @@ export function LocationSection() {
                           )}
                           {h.day}
                           {h.day === todayCap && (
-                            <span className="rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-400">
+                            <span className="rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] font-medium text-green-700">
                               Hoy
                             </span>
                           )}

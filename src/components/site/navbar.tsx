@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Coffee, Menu, ShoppingBag, X } from "lucide-react";
+import { Coffee, Menu, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { useCart } from "@/lib/cart-store";
-import { ThemeToggle } from "./theme-toggle";
 import { LivePill } from "./live-pill";
 
 const NAV_LINKS = [
@@ -70,8 +69,6 @@ export function Navbar() {
         {/* Right cluster */}
         <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
           <LivePill />
-
-          <ThemeToggle />
 
           <Button
             variant="ghost"

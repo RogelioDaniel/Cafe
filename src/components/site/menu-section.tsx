@@ -18,12 +18,12 @@ interface MenuSectionProps {
 
 const TAG_META: Record<string, { icon?: React.ElementType; className: string; label: string }> = {
   popular: { icon: Flame, className: "bg-accent/15 text-accent border-accent/30", label: "Popular" },
-  nuevo: { icon: Sparkles, className: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30", label: "Nuevo" },
-  vegano: { icon: Leaf, className: "bg-green-700/10 text-green-800 dark:text-green-400 border-green-700/25", label: "Vegano" },
+  nuevo: { icon: Sparkles, className: "bg-amber-500/15 text-amber-700 border-amber-500/30", label: "Nuevo" },
+  vegano: { icon: Leaf, className: "bg-green-700/10 text-green-800 border-green-700/25", label: "Vegano" },
   "sin-gluten": { className: "bg-primary/10 text-primary border-primary/25", label: "Sin gluten" },
-  picante: { icon: Flame, className: "bg-red-700/10 text-red-700 dark:text-red-400 border-red-700/25", label: "Picante" },
+  picante: { icon: Flame, className: "bg-red-700/10 text-red-700 border-red-700/25", label: "Picante" },
   clasico: { className: "bg-secondary text-secondary-foreground border-border", label: "Clásico" },
-  "de-autor": { icon: Sparkles, className: "bg-amber-600/15 text-amber-800 dark:text-amber-300 border-amber-600/30", label: "De autor" },
+  "de-autor": { icon: Sparkles, className: "bg-amber-600/15 text-amber-800 border-amber-600/30", label: "De autor" },
 };
 
 export function MenuSection({ categories }: MenuSectionProps) {

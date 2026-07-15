@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Bowlby_One, IBM_Plex_Mono, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 
 const nunito = Nunito_Sans({
   variable: "--font-karla",
@@ -58,7 +57,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#b5651d",
+  themeColor: "#1f7df0",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -70,30 +69,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-MX" suppressHydrationWarning>
+    <html lang="es-MX">
       <body
         className={`${nunito.variable} ${bowlby.variable} ${plexMono.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
       >
         <a className="skip-link" href="#main-content">
           Saltar al contenido
         </a>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              classNames: {
-                toast:
-                  "bg-card text-card-foreground border-border rounded-xl shadow-lg",
-              },
-            }}
-          />
-        </ThemeProvider>
+        {children}
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            classNames: {
+              toast:
+                "bg-card text-card-foreground border-border rounded-xl shadow-lg",
+            },
+          }}
+        />
       </body>
     </html>
   );
