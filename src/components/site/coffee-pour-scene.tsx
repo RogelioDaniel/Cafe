@@ -91,10 +91,13 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
     if (!host) return;
 
     let renderer: THREE.WebGLRenderer | null = null;
-    let frame = 0;
     let disposed = false;
     let completed = false;
+    let inViewport = true;
+    let loopRunning = false;
     let touchDragging = false;
+    let pointerTargetX = 0;
+    let pointerTargetY = 0;
 
     try {
       renderer = new THREE.WebGLRenderer({
@@ -363,17 +366,35 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
       const pourProgress = easeInOut(clamp01((elapsed - 0.72) / 2.35));
       const liquidHeight = 0.045 + pourProgress * 1.34;
       const liquidTop = liquidBottom + liquidHeight;
+      const settledProgress = easeOutCubic(clamp01((elapsed - 3.05) / 0.9));
 
       cup.scale.setScalar(0.82 + entrance * 0.18);
-      cup.position.y = (1 - entrance) * 0.32 + Math.sin(elapsed * 2.1) * 0.006 * (1 - pourProgress);
-      cup.rotation.y = THREE.MathUtils.lerp(-1.28, -0.52, entrance) + Math.sin(elapsed * 0.9) * 0.012;
-      cup.rotation.z = (1 - entrance) * -0.07;
+      if (completed) {
+        cup.position.y += (0 - cup.position.y) * 0.08;
+        cup.rotation.x += (0.035 + pointerTargetY * 0.065 - cup.rotation.x) * 0.075;
+        cup.rotation.y += (-0.52 + pointerTargetX * 0.24 - cup.rotation.y) * 0.075;
+        cup.rotation.z += (0 - cup.rotation.z) * 0.08;
+        coaster.rotation.y += (pointerTargetX * 0.035 - coaster.rotation.y) * 0.08;
+      } else {
+        cup.position.y = (1 - entrance) * 0.32 + Math.sin(elapsed * 2.1) * 0.006 * (1 - pourProgress);
+        cup.rotation.x = 0.035;
+        cup.rotation.y = THREE.MathUtils.lerp(-1.28, -0.52, entrance) + Math.sin(elapsed * 0.9) * 0.012;
+        cup.rotation.z = (1 - entrance) * -0.07;
+      }
       coaster.scale.setScalar(0.88 + easeOutCubic(clamp01((elapsed - 0.1) / 1.05)) * 0.12);
 
       coffee.scale.y = liquidHeight;
       coffee.position.y = liquidBottom + liquidHeight / 2;
-      surface.position.y = liquidTop + 0.007;
-      surface.scale.setScalar(0.94 + pourProgress * 0.06);
+      const surfaceBreath = settledProgress * Math.sin(elapsed * 1.12) * 0.0035;
+      const surfaceScale = 0.94 + pourProgress * 0.06;
+      surface.position.y = liquidTop + 0.007 + surfaceBreath;
+      surface.rotation.x = -Math.PI / 2 + settledProgress * Math.sin(elapsed * 0.72) * 0.006;
+      surface.rotation.y = settledProgress * Math.sin(elapsed * 0.55 + 0.8) * 0.006;
+      surface.scale.set(
+        surfaceScale * (1 + settledProgress * Math.sin(elapsed * 0.9) * 0.0025),
+        surfaceScale * (1 + settledProgress * Math.cos(elapsed * 0.82) * 0.003),
+        1
+      );
 
       const streamLength = Math.max(0.01, streamTop - liquidTop);
       const streamVisible = elapsed > 0.58 && pourProgress < 0.988;
@@ -394,20 +415,25 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
 
       ripples.forEach((ripple, index) => {
         ripple.position.y = liquidTop + 0.018 + index * 0.003;
-        const pulse = (elapsed * 1.65 + index * 0.52) % 1;
-        ripple.scale.setScalar(0.45 + pulse * 0.9);
+        const pourPulse = (elapsed * 1.65 + index * 0.52) % 1;
+        const ambientPulse = (elapsed * 0.34 + index * 0.5) % 1;
+        ripple.scale.setScalar(
+          streamVisible ? 0.45 + pourPulse * 0.9 : 0.58 + ambientPulse * 0.55
+        );
         (ripple.material as THREE.MeshBasicMaterial).opacity = streamVisible
-          ? (1 - pulse) * 0.34
-          : Math.max(0, (1 - clamp01((elapsed - 3.05) / 0.7)) * 0.12);
+          ? (1 - pourPulse) * 0.34
+          : settledProgress * (1 - ambientPulse) * 0.052;
       });
 
       const steamProgress = easeOutCubic(clamp01((elapsed - 2.35) / 1.05));
       steam.forEach((steamLine, index) => {
         const material = steamLine.material as THREE.MeshBasicMaterial;
-        material.opacity = steamProgress * (0.2 - index * 0.025);
-        steamLine.position.x = Math.sin(elapsed * 1.05 + index * 1.7) * 0.035;
-        steamLine.position.y = Math.sin(elapsed * 1.35 + index) * 0.025;
-        steamLine.rotation.z = Math.sin(elapsed * 0.72 + index) * 0.03;
+        const breath = 0.5 + Math.sin(elapsed * 0.72 + index * 1.4) * 0.5;
+        material.opacity = steamProgress * (0.105 + breath * (0.07 - index * 0.008));
+        steamLine.position.x = Math.sin(elapsed * 0.65 + index * 1.7) * 0.05;
+        steamLine.position.y = Math.sin(elapsed * 0.48 + index) * 0.035;
+        steamLine.rotation.z = Math.sin(elapsed * 0.58 + index) * 0.045;
+        steamLine.scale.set(0.96 + breath * 0.04, 0.94 + breath * 0.08, 1);
       });
 
       camera.position.copy(cameraBase);
@@ -420,25 +446,16 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
         onReadyRef.current();
       }
 
-      if (elapsed < 5.4) {
-        frame = requestAnimationFrame(render);
-      } else {
+      if (!completed && elapsed >= 5.4) {
         completed = true;
-        cup.position.y = 0;
-        cup.rotation.set(0.035, -0.52, 0);
-        renderScene();
       }
     };
 
     const rotateFromPointer = (clientX: number, clientY: number) => {
       if (!completed || disposed) return;
       const rect = host.getBoundingClientRect();
-      const x = clamp01((clientX - rect.left) / rect.width) * 2 - 1;
-      const y = clamp01((clientY - rect.top) / rect.height) * 2 - 1;
-      cup.rotation.y = -0.52 + x * 0.24;
-      cup.rotation.x = 0.035 + y * 0.065;
-      coaster.rotation.y = x * 0.035;
-      renderScene();
+      pointerTargetX = clamp01((clientX - rect.left) / rect.width) * 2 - 1;
+      pointerTargetY = clamp01((clientY - rect.top) / rect.height) * 2 - 1;
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -457,17 +474,33 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
     };
     const onPointerLeave = (event: PointerEvent) => {
       if (!completed || event.pointerType !== "mouse") return;
-      cup.rotation.set(0.035, -0.52, 0);
-      coaster.rotation.y = 0;
-      renderScene();
+      pointerTargetX = 0;
+      pointerTargetY = 0;
+    };
+
+    const stopLoop = () => {
+      if (!renderer || !loopRunning) return;
+      renderer.setAnimationLoop(null);
+      loopRunning = false;
+    };
+    const startLoop = () => {
+      if (!renderer || disposed || loopRunning || document.hidden || !inViewport) return;
+      timer.reset();
+      renderer.setAnimationLoop(render);
+      loopRunning = true;
     };
     const onVisibility = () => {
-      if (document.hidden) {
-        cancelAnimationFrame(frame);
-      } else if (!completed) {
-        frame = requestAnimationFrame(render);
-      }
+      if (document.hidden) stopLoop();
+      else startLoop();
     };
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        inViewport = entry?.isIntersecting ?? true;
+        if (inViewport) startLoop();
+        else stopLoop();
+      },
+      { rootMargin: "120px 0px", threshold: 0.01 }
+    );
 
     host.addEventListener("pointerdown", onPointerDown);
     host.addEventListener("pointermove", onPointerMove);
@@ -475,17 +508,19 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
     host.addEventListener("pointercancel", onPointerUp);
     host.addEventListener("pointerleave", onPointerLeave);
     document.addEventListener("visibilitychange", onVisibility);
-    render();
+    intersectionObserver.observe(host);
+    startLoop();
 
     return () => {
       disposed = true;
-      cancelAnimationFrame(frame);
+      stopLoop();
       host.removeEventListener("pointerdown", onPointerDown);
       host.removeEventListener("pointermove", onPointerMove);
       host.removeEventListener("pointerup", onPointerUp);
       host.removeEventListener("pointercancel", onPointerUp);
       host.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibility);
+      intersectionObserver.disconnect();
       resizeObserver.disconnect();
       timer.dispose();
       scene.traverse((object) => {

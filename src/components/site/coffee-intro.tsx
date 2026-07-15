@@ -7,10 +7,25 @@ const REDUCED_MOTION_DISPLAY_MS = 650;
 const EXIT_MS = 300;
 const HARD_TIMEOUT_MS = 2900;
 
+const CUP_MODELS = [
+  "bandas",
+  "jarrito",
+  "pocillo",
+  "olla",
+  "espresso",
+  "campana",
+  "jicara",
+  "tarro",
+  "barro-negro",
+  "talavera",
+] as const;
+
 type IntroPhase = "visible" | "leaving" | "hidden";
+type CupModel = (typeof CUP_MODELS)[number];
 
 export function CoffeeIntro() {
   const [phase, setPhase] = useState<IntroPhase>("visible");
+  const [cupModel, setCupModel] = useState<CupModel | null>(null);
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -33,6 +48,9 @@ export function CoffeeIntro() {
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const randomValue = new Uint32Array(1);
+    window.crypto.getRandomValues(randomValue);
+    setCupModel(CUP_MODELS[randomValue[0] % CUP_MODELS.length]);
     document.documentElement.classList.remove("tonalli-intro-seen");
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
@@ -74,7 +92,10 @@ export function CoffeeIntro() {
       </button>
 
       <div className="coffee-intro__stage" aria-hidden="true">
-        <div className="coffee-intro__loader-mark">
+        <div
+          className={`coffee-intro__loader-mark ${cupModel ? "is-ready" : ""}`}
+          data-cup-model={cupModel ?? undefined}
+        >
           <span className="coffee-intro__stream" />
           <span className="coffee-intro__cup">
             <span className="coffee-intro__well">
