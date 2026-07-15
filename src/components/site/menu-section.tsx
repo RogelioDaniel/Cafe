@@ -55,11 +55,15 @@ export function MenuSection({ categories }: MenuSectionProps) {
   const totalItems = categories.reduce((a, c) => a + c.items.length, 0);
 
   return (
-    <section id="menu" className="relative scroll-mt-20 overflow-hidden bg-background py-20 sm:py-28">
+    <section id="menu" className="menu-section relative scroll-mt-20 overflow-hidden bg-background py-20 sm:py-28">
       <div className="menu-stain pointer-events-none absolute -right-32 top-32 h-96 w-96 opacity-30" aria-hidden="true" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="grid items-end gap-7 border-b border-foreground/20 pb-9 lg:grid-cols-[1fr_0.72fr]">
+        <div className="relative grid items-end gap-7 border-b border-foreground/20 pb-9 lg:grid-cols-[1fr_0.72fr]">
+          <div className="menu-order-slip" aria-hidden="true">
+            <span>Comanda de la casa</span>
+            <strong>Barra abierta · 07:00</strong>
+          </div>
           <div>
             <p className="flex items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-primary">
               <span className="coffee-bean-mark" aria-hidden="true" />
@@ -168,7 +172,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`min-h-11 cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+      className={`menu-filter min-h-11 cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all ${
         active
           ? "border-primary bg-primary text-primary-foreground shadow-sm"
           : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
@@ -199,7 +203,7 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
   }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-sm border border-border border-b-primary/35 bg-card shadow-[0_12px_30px_rgba(70,31,15,0.06)] transition-[border-color,box-shadow] duration-300 hover:border-primary/45 hover:shadow-[0_18px_38px_rgba(70,31,15,0.11)]">
+    <article className="menu-ticket group relative flex flex-col overflow-hidden rounded-sm border border-border border-b-primary/35 bg-card shadow-[0_12px_30px_rgba(70,31,15,0.06)] transition-[border-color,box-shadow] duration-300 hover:border-primary/45 hover:shadow-[0_18px_38px_rgba(70,31,15,0.11)]">
       {/* Image */}
       <div className="relative aspect-[5/4] overflow-hidden bg-secondary">
         {item.image ? (
@@ -271,7 +275,7 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
         <div className="mt-4 pt-1">
           <Button
             onClick={addToOrder}
-            className="relative min-h-11 w-full cursor-pointer overflow-hidden rounded-md bg-primary/95 text-primary-foreground transition-colors hover:bg-primary"
+            className="tonalli-press relative min-h-11 w-full cursor-pointer overflow-hidden rounded-md bg-primary/95 text-primary-foreground transition-colors hover:bg-primary"
             size="sm"
             aria-live="polite"
           >

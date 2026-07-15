@@ -37,7 +37,7 @@ export function LiveStatsBar() {
 
   return (
     <section
-      className="border-y border-border bg-card"
+      className="bar-ticket relative border-y border-border bg-card"
       aria-label="Estadísticas en vivo"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-2 px-4 sm:px-6 md:grid-cols-5 lg:px-8">

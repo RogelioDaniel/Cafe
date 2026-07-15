@@ -45,7 +45,7 @@ export function Navbar() {
           className="group flex min-h-11 min-w-0 items-center gap-2 sm:gap-2.5"
           aria-label="Café Tonalli — inicio"
         >
-          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105 sm:h-11 sm:w-11">
+          <span className="tonalli-logo-mark relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform group-hover:scale-105 sm:h-11 sm:w-11">
             <Coffee className="h-4.5 w-4.5" strokeWidth={2.2} />
           </span>
           <span className="flex flex-col leading-none">

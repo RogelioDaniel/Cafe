@@ -901,6 +901,434 @@ body:has(.coffee-intro) {
   clip-path: polygon(0 9%, 50% 0, 100% 9%, 100% 100%, 0 100%);
 }
 
+/* === First service: hero choreography after the coffee intro === */
+.hero-title-line {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+
+.hero-title-line > span {
+  display: block;
+  transform-origin: left bottom;
+}
+
+.hero-first-steam {
+  position: absolute;
+  left: 39%;
+  top: 0.5%;
+  z-index: 4;
+  width: 24%;
+  height: 27%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0 7px rgba(255, 232, 196, 0.18));
+}
+
+.hero-first-steam path {
+  fill: none;
+  stroke: rgba(255, 236, 205, 0.58);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 185;
+  stroke-dashoffset: 185;
+  opacity: 0;
+}
+
+.tonalli-hero-ready .hero-reveal {
+  animation: hero-copy-rise 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tonalli-hero-ready .hero-reveal--eyebrow { animation-delay: 80ms; }
+.tonalli-hero-ready .hero-reveal--copy { animation-delay: 410ms; }
+.tonalli-hero-ready .hero-reveal--actions { animation-delay: 520ms; }
+.tonalli-hero-ready .hero-reveal--details { animation-delay: 630ms; }
+
+.tonalli-hero-ready .hero-title-line > span {
+  animation: hero-line-serve 820ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tonalli-hero-ready .hero-title-line:nth-child(1) > span { animation-delay: 130ms; }
+.tonalli-hero-ready .hero-title-line:nth-child(2) > span { animation-delay: 210ms; }
+.tonalli-hero-ready .hero-title-line:nth-child(3) > span { animation-delay: 290ms; }
+
+.tonalli-hero-ready .hero-service {
+  animation: hero-clay-settle 980ms cubic-bezier(0.16, 1, 0.3, 1) 110ms both;
+  transform-origin: 50% 88%;
+}
+
+.tonalli-hero-ready .hero-first-steam path {
+  animation: hero-steam-draw 1.55s ease-out 720ms both;
+}
+
+.tonalli-hero-ready .hero-first-steam path:nth-child(2) { animation-delay: 850ms; }
+.tonalli-hero-ready .hero-first-steam path:nth-child(3) { animation-delay: 980ms; }
+
+.tonalli-hero-ready .hero-kitchen-ticket {
+  animation: hero-ticket-stamp 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 820ms both;
+  transform-origin: center;
+}
+
+.tonalli-hero-ready .hero-stats {
+  animation: hero-stats-serve 620ms cubic-bezier(0.16, 1, 0.3, 1) 690ms both;
+}
+
+.tonalli-press {
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out, background-color 180ms ease-out;
+}
+
+.tonalli-press:active {
+  transform: translateY(2px) scale(0.975);
+  box-shadow: 0 5px 14px rgba(80, 31, 14, 0.18);
+}
+
+.tonalli-logo-mark::before,
+.tonalli-logo-mark::after {
+  content: "";
+  position: absolute;
+  top: 0.33rem;
+  width: 2px;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+}
+
+.tonalli-logo-mark::before { left: 44%; }
+.tonalli-logo-mark::after { left: 57%; }
+
+.group:hover .tonalli-logo-mark::before,
+.group:focus-visible .tonalli-logo-mark::before,
+.group:hover .tonalli-logo-mark::after,
+.group:focus-visible .tonalli-logo-mark::after {
+  animation: logo-steam-puff 650ms ease-out both;
+}
+
+.group:hover .tonalli-logo-mark::after,
+.group:focus-visible .tonalli-logo-mark::after {
+  animation-delay: 80ms;
+}
+
+@keyframes hero-copy-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-line-serve {
+  from { opacity: 0; transform: translateY(112%) rotate(1.6deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+@keyframes hero-clay-settle {
+  0% { opacity: 0; transform: translateY(74px) rotate(1.8deg) scale(0.96); }
+  72% { opacity: 1; transform: translateY(-5px) rotate(-0.2deg) scale(1.006); }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes hero-steam-draw {
+  0% { opacity: 0; stroke-dashoffset: 185; transform: translateY(8px); }
+  24% { opacity: 0.66; }
+  72% { opacity: 0.5; stroke-dashoffset: 0; }
+  100% { opacity: 0; stroke-dashoffset: -36; transform: translateY(-11px); }
+}
+
+@keyframes hero-ticket-stamp {
+  from { opacity: 0; transform: scale(1.16) rotate(-3deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes hero-stats-serve {
+  from { opacity: 0; transform: translateX(-26px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes logo-steam-puff {
+  0% { opacity: 0; transform: translateY(3px) scaleY(0.45); }
+  35% { opacity: 0.72; }
+  100% { opacity: 0; transform: translateY(-5px) scaleY(1.08); }
+}
+
+/* === Tonalli material language across the page === */
+.bar-ticket {
+  box-shadow: inset 0 5px 0 color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.bar-ticket::before,
+.bar-ticket::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 6px;
+  pointer-events: none;
+  background: radial-gradient(circle at 6px 0, transparent 3.5px, color-mix(in srgb, var(--primary) 28%, transparent) 4px, transparent 4.7px) 0 0 / 12px 6px repeat-x;
+  opacity: 0.72;
+}
+
+.bar-ticket::before { top: -1px; }
+.bar-ticket::after { bottom: -1px; transform: rotate(180deg); }
+
+.menu-section {
+  background-image:
+    linear-gradient(rgba(122, 75, 35, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 75, 35, 0.018) 1px, transparent 1px);
+  background-size: 38px 38px;
+}
+
+.menu-order-slip {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: -0.25rem;
+  min-width: 12.5rem;
+  transform: rotate(1.2deg);
+  border: 1px dashed color-mix(in srgb, var(--primary) 46%, var(--border));
+  background: color-mix(in srgb, var(--card) 92%, var(--secondary));
+  padding: 0.7rem 0.85rem;
+  box-shadow: 3px 5px 0 color-mix(in srgb, var(--primary) 10%, transparent);
+  font-family: var(--font-plex-mono), monospace;
+  text-transform: uppercase;
+}
+
+.menu-order-slip span,
+.menu-order-slip strong {
+  display: block;
+}
+
+.menu-order-slip span {
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: var(--muted-foreground);
+}
+
+.menu-order-slip strong {
+  margin-top: 0.18rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  color: var(--foreground);
+}
+
+.menu-filter:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.menu-ticket::before {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  z-index: 4;
+  width: 2rem;
+  height: 2rem;
+  background: linear-gradient(225deg, var(--background) 0 49%, color-mix(in srgb, var(--primary) 24%, var(--border)) 50% 52%, var(--card) 53%);
+  pointer-events: none;
+}
+
+.menu-ticket::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.35rem;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--primary) 35%, transparent) 0 5px, transparent 5px 10px);
+  pointer-events: none;
+}
+
+.origin-route-stamp {
+  display: inline-flex;
+  margin-top: 1.35rem;
+  transform: rotate(-1.2deg);
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px dashed rgba(239, 173, 104, 0.45);
+  padding: 0.55rem 0.75rem;
+  color: #efad68;
+  font-family: var(--font-plex-mono), monospace;
+  text-transform: uppercase;
+}
+
+.origin-route-stamp span {
+  font-size: 0.52rem;
+  letter-spacing: 0.16em;
+  opacity: 0.65;
+}
+
+.origin-route-stamp strong {
+  font-size: 0.63rem;
+  letter-spacing: 0.09em;
+}
+
+.reservation-section {
+  overflow: clip;
+  background-image:
+    radial-gradient(circle at 12% 16%, color-mix(in srgb, var(--primary) 7%, transparent) 0 1px, transparent 1.5px),
+    linear-gradient(105deg, transparent 0 72%, color-mix(in srgb, var(--primary) 5%, transparent) 72% 72.15%, transparent 72.15%);
+  background-size: 18px 18px, 100% 100%;
+}
+
+.reservation-ticket {
+  position: relative;
+  isolation: isolate;
+  box-shadow: 0 25px 70px rgba(72, 36, 17, 0.12), inset 0 3px 0 color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.reservation-ticket::before,
+.reservation-ticket::after {
+  content: "";
+  position: absolute;
+  top: 8.25rem;
+  z-index: 3;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--secondary) 88%, var(--background));
+}
+
+.reservation-ticket::before { left: -0.66rem; }
+.reservation-ticket::after { right: -0.66rem; }
+
+.reservation-folio {
+  display: flex;
+  margin: -0.1rem 0 1.2rem;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--primary) 34%, var(--border));
+  padding-bottom: 0.7rem;
+  color: var(--muted-foreground);
+  font: 500 0.58rem/1.2 var(--font-plex-mono), monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.reservation-folio strong {
+  color: var(--primary);
+}
+
+.sobremesa-section::before {
+  content: "";
+  position: absolute;
+  left: -5rem;
+  top: 18%;
+  width: 17rem;
+  height: 17rem;
+  border: 13px solid color-mix(in srgb, var(--primary) 7%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 5%, transparent);
+  pointer-events: none;
+}
+
+.coffee-note {
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--primary) 5%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.coffee-note::after {
+  content: "SOBREMESA · ROMA NORTE";
+  position: absolute;
+  right: -2.2rem;
+  bottom: 1.6rem;
+  transform: rotate(-90deg);
+  color: color-mix(in srgb, var(--primary) 45%, transparent);
+  font: 500 0.5rem/1 var(--font-plex-mono), monospace;
+  letter-spacing: 0.17em;
+}
+
+.location-section {
+  background-image:
+    radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--primary) 6%, transparent), transparent 24%),
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 2.5%, transparent) 25%, transparent 25% 50%, color-mix(in srgb, var(--primary) 2.5%, transparent) 50% 75%, transparent 75%);
+  background-size: auto, 28px 28px;
+}
+
+.azulejo-trim,
+.footer-papel-trim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1rem;
+  pointer-events: none;
+}
+
+.azulejo-trim {
+  background:
+    linear-gradient(45deg, transparent 34%, color-mix(in srgb, var(--primary) 75%, #456f82) 35% 42%, transparent 43% 58%, color-mix(in srgb, var(--primary) 75%, #456f82) 59% 66%, transparent 67%),
+    linear-gradient(-45deg, transparent 34%, color-mix(in srgb, var(--primary) 62%, #456f82) 35% 42%, transparent 43% 58%, color-mix(in srgb, var(--primary) 62%, #456f82) 59% 66%, transparent 67%);
+  background-color: color-mix(in srgb, var(--card) 88%, #7da2ad);
+  background-size: 2rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border));
+}
+
+.location-postcard {
+  transform: rotate(-0.55deg);
+  transition: transform 260ms ease-out, box-shadow 260ms ease-out;
+}
+
+.location-postcard:hover {
+  transform: rotate(0) translateY(-3px);
+  box-shadow: 0 22px 45px rgba(71, 34, 16, 0.16);
+}
+
+.location-tile {
+  position: relative;
+  overflow: hidden;
+  border-left-width: 4px;
+  border-left-color: color-mix(in srgb, var(--primary) 72%, var(--border));
+  box-shadow: 0 8px 24px rgba(72, 36, 17, 0.055);
+}
+
+.location-tile::after {
+  content: "";
+  position: absolute;
+  right: -1.15rem;
+  top: -1.15rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  transform: rotate(45deg);
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+}
+
+.footer-papel-trim {
+  height: 1.15rem;
+  background: linear-gradient(135deg, #d06a35 0 25%, transparent 25%) 0 0 / 1.15rem 1.15rem,
+    linear-gradient(225deg, #d06a35 0 25%, transparent 25%) 0 0 / 1.15rem 1.15rem;
+  opacity: 0.78;
+}
+
+.tonalli-footer {
+  padding-top: 0.35rem;
+}
+
+@media (min-width: 1024px) {
+  .menu-order-slip { display: block; }
+}
+
+@media (max-width: 640px) {
+  .hero-first-steam {
+    left: 37%;
+    width: 28%;
+  }
+
+  .location-postcard,
+  .location-postcard:hover {
+    transform: none;
+  }
+
+  .reservation-ticket::before,
+  .reservation-ticket::after {
+    top: 7.75rem;
+  }
+
+  .coffee-note::after { display: none; }
+}
+
 .coffee-bean-mark {
   position: relative;
   display: inline-block;

@@ -32,7 +32,7 @@ export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
   const current = reviews[idx];
 
   return (
-    <section className="bg-background py-20 sm:py-28">
+    <section className="sobremesa-section relative overflow-hidden bg-background py-20 sm:py-28">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-5 border-b border-foreground/18 pb-8 sm:grid-cols-[1fr_auto] sm:items-end sm:text-left">
           <div>
@@ -59,7 +59,7 @@ export function Testimonials({ initialReviews }: { initialReviews: Review[] }) {
 
         {/* Featured review */}
         <div
-          className="relative mt-12 overflow-hidden rounded-sm border border-border bg-card p-8 shadow-[0_18px_50px_rgba(70,31,15,0.08)] sm:p-12"
+          className="coffee-note relative mt-12 overflow-hidden rounded-sm border border-border bg-card p-8 shadow-[0_18px_50px_rgba(70,31,15,0.08)] sm:p-12"
           onMouseEnter={() => setAuto(false)}
           onMouseLeave={() => setAuto(true)}
           onFocusCapture={() => setAuto(false)}

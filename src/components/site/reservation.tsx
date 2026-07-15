@@ -223,7 +223,7 @@ export function Reservation() {
   }
 
   return (
-    <section id="reservar" className="relative scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
+    <section id="reservar" className="reservation-section relative scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid min-w-0 gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Left — copy + live info */}
@@ -287,8 +287,12 @@ export function Reservation() {
           {/* Right — form */}
           <form
             onSubmit={submit}
-            className="-mx-2 min-w-0 rounded-2xl border border-border bg-card p-4 shadow-lg sm:mx-0 sm:p-8"
+            className="reservation-ticket -mx-2 min-w-0 rounded-2xl border border-border bg-card p-4 shadow-lg sm:mx-0 sm:p-8"
           >
+            <div className="reservation-folio" aria-hidden="true">
+              <span>Comanda de mesa</span>
+              <strong>Folio · RN 014</strong>
+            </div>
             <div className="flex items-center gap-3">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-xs font-semibold text-primary-foreground">
                 1
@@ -574,7 +578,7 @@ export function Reservation() {
             <Button
               type="submit"
               disabled={submitting || availability?.slotsLeft === 0}
-              className="mt-5 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="tonalli-press mt-5 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
               size="lg"
             >
               {submitting ? (

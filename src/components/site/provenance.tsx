@@ -45,7 +45,7 @@ export function Provenance() {
   return (
     <section
       id="historia"
-      className="relative scroll-mt-20 overflow-hidden bg-[#20100a] py-20 text-[#fff5df] sm:py-28"
+      className="provenance-section relative scroll-mt-20 overflow-hidden bg-[#20100a] py-20 text-[#fff5df] sm:py-28"
     >
       {/* Texture */}
       <div className="absolute inset-0 bg-grain-dark opacity-60" />
@@ -63,11 +63,17 @@ export function Provenance() {
             <span className="italic text-amber-300">cuatrocientos años.</span>
           </h2>
           </div>
-          <p className="max-w-xl text-pretty text-lg leading-relaxed text-[#fff5df]/70 lg:justify-self-end">
-            No es una cafetería más. Es un ritual que viene desde antes de que
-            existiera el café en México: sembrar, tostar, moler y servir como
-            una sola historia.
-          </p>
+          <div className="max-w-xl lg:justify-self-end">
+            <p className="text-pretty text-lg leading-relaxed text-[#fff5df]/70">
+              No es una cafetería más. Es un ritual que viene desde antes de que
+              existiera el café en México: sembrar, tostar, moler y servir como
+              una sola historia.
+            </p>
+            <div className="origin-route-stamp" aria-hidden="true">
+              <span>Ruta del lote</span>
+              <strong>Coatepec → Roma Norte</strong>
+            </div>
+          </div>
         </div>
 
         {/* Timeline */}

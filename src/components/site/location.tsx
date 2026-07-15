@@ -23,7 +23,8 @@ export function LocationSection() {
   const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 
   return (
-    <section id="ubicacion" className="scroll-mt-20 bg-secondary/40 py-20 sm:py-28">
+    <section id="ubicacion" className="location-section relative scroll-mt-20 overflow-hidden bg-secondary/40 py-20 sm:py-28">
+      <div className="azulejo-trim" aria-hidden="true" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <p className="font-mono text-xs uppercase tracking-[0.22em] text-primary">
@@ -36,7 +37,7 @@ export function LocationSection() {
 
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
           {/* Map / interior image */}
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border shadow-lg">
+          <div className="location-postcard relative aspect-[4/3] overflow-hidden rounded-2xl border border-border shadow-lg">
             <Image
               src="/images/interior/cafe-interior.png"
               alt="Interior cálido de Café Tonalli en Roma Norte con mesas de madera, lámparas de cobre y papel picado"
@@ -57,7 +58,7 @@ export function LocationSection() {
           {/* Info */}
           <div className="flex flex-col gap-6">
             {/* Address */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="location-tile rounded-2xl border border-border bg-card p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
                   <MapPin className="h-5 w-5 text-primary" />
@@ -92,7 +93,7 @@ export function LocationSection() {
             </div>
 
             {/* Hours */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="location-tile rounded-2xl border border-border bg-card p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
                   <Clock className="h-5 w-5 text-primary" />
@@ -134,7 +135,7 @@ export function LocationSection() {
             </div>
 
             {/* Contact */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="location-tile rounded-2xl border border-border bg-card p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
                   <Phone className="h-5 w-5 text-primary" />

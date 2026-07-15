@@ -26,7 +26,8 @@ export function SiteFooter() {
   }
 
   return (
-    <footer className="mt-auto bg-[#170b07] text-[#fff5df]">
+    <footer className="tonalli-footer relative mt-auto bg-[#170b07] text-[#fff5df]">
+      <div className="footer-papel-trim" aria-hidden="true" />
       {/* Newsletter band */}
       <div className="border-b border-[#fff5df]/10">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

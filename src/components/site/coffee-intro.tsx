@@ -38,6 +38,8 @@ export function CoffeeIntro() {
     if (exitTimer.current) clearTimeout(exitTimer.current);
     if (hardTimer.current) clearTimeout(hardTimer.current);
 
+    document.documentElement.classList.add("tonalli-hero-ready");
+    window.dispatchEvent(new Event("tonalli:intro-complete"));
     setPhase("leaving");
     hideTimer.current = setTimeout(() => {
       setPhase("hidden");
@@ -52,6 +54,7 @@ export function CoffeeIntro() {
     window.crypto.getRandomValues(randomValue);
     setCupModel(CUP_MODELS[randomValue[0] % CUP_MODELS.length]);
     document.documentElement.classList.remove("tonalli-intro-seen");
+    document.documentElement.classList.remove("tonalli-hero-ready");
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
 
