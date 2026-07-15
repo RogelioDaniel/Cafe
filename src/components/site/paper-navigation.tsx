@@ -10,14 +10,17 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { createPortal } from "react-dom";
+import {
+  preparePageCrumple,
+  runPageCrumpleTransition,
+  type PageCrumplePhase,
+} from "./page-crumple-transition";
 
-type PaperTone = "azul" | "barro" | "crema" | "hoja" | "maiz" | "bugambilia";
-type PaperPhase = "idle" | "crumpling" | "uncrumpling";
+type PaperPhase = "idle" | PageCrumplePhase;
 
 type PaperNavigationOptions = {
   label?: string;
-  /** Lets the mobile sheet close before the crumpled paper covers the page. */
+  /** Lets the mobile menu close before capturing the current viewport. */
   delay?: number;
 };
 
@@ -31,16 +34,19 @@ type PaperNavigationContextValue = {
 
 const PaperNavigationContext = createContext<PaperNavigationContextValue | null>(null);
 
-const CRUMPLE_MS = 720;
-const UNCRUMPLE_MS = 840;
-const CRUMPLE_FACETS = Array.from({ length: 12 }, (_, index) => index + 1);
+const PAPER_DESTINATIONS: Record<string, string> = {
+  "#inicio": "El comal abre",
+  "#menu": "La carta de hoy",
+  "#historia": "Del metate a la memoria",
+  "#reservar": "Tu mesa se prepara",
+  "#ubicacion": "Rumbo a Roma Norte",
+};
 
-const PAPER_DESTINATIONS: Record<string, { label: string; tone: PaperTone }> = {
-  "#inicio": { label: "El comal abre", tone: "azul" },
-  "#menu": { label: "La carta de hoy", tone: "maiz" },
-  "#historia": { label: "Del metate a la memoria", tone: "barro" },
-  "#reservar": { label: "Tu mesa se prepara", tone: "crema" },
-  "#ubicacion": { label: "Rumbo a Roma Norte", tone: "hoja" },
+const PHASE_MESSAGES: Record<Exclude<PaperPhase, "idle">, string> = {
+  capturing: "Preparando esta página como una hoja",
+  crumpling: "Arrugando la página actual",
+  swapping: "Cambiando la comanda dentro del papel",
+  uncrumpling: "Desarrugando la página de destino",
 };
 
 function getHashTarget(hash: string) {
@@ -55,9 +61,10 @@ function getHashTarget(hash: string) {
 
 export function PaperNavigationProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<PaperPhase>("idle");
-  const [mounted, setMounted] = useState(false);
   const [destination, setDestination] = useState(PAPER_DESTINATIONS["#inicio"]);
   const timers = useRef<number[]>([]);
+  const transitionAbort = useRef<AbortController | null>(null);
+  const running = useRef(false);
 
   const clearTimers = useCallback(() => {
     timers.current.forEach((timer) => window.clearTimeout(timer));
@@ -70,12 +77,10 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
     return timer;
   }, []);
 
-  const moveToTarget = useCallback((hash: string, target: HTMLElement, focusTarget: boolean) => {
+  const commitTarget = useCallback((hash: string, target: HTMLElement) => {
     const root = document.documentElement;
     root.classList.add("paper-navigation--jumping");
 
-    // Keep the URL and browser history useful without allowing the global smooth-scroll
-    // rule to reveal the destination before the sheet has covered the viewport.
     if (window.location.hash !== hash) {
       window.history.pushState(null, "", hash);
     }
@@ -84,47 +89,70 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
     window.requestAnimationFrame(() => {
       root.classList.remove("paper-navigation--jumping");
     });
+  }, []);
 
-    if (focusTarget) {
-      target.setAttribute("tabindex", "-1");
-      target.focus({ preventScroll: true });
+  const focusDestination = useCallback((target: HTMLElement, shouldFocus: boolean) => {
+    if (!shouldFocus) return;
+    const previousTabIndex = target.getAttribute("tabindex");
+    target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
+
+    if (previousTabIndex === null) {
+      target.addEventListener(
+        "blur",
+        () => target.removeAttribute("tabindex"),
+        { once: true }
+      );
     }
   }, []);
 
   const startNavigation = useCallback(
     (hash: string, target: HTMLElement, options: PaperNavigationOptions, focusTarget: boolean) => {
       clearTimers();
-      const nextDestination = PAPER_DESTINATIONS[hash] ?? {
-        label: options.label ?? "La siguiente parada",
-        tone: "bugambilia" as PaperTone,
-      };
-      setDestination({ ...nextDestination, label: options.label ?? nextDestination.label });
+      running.current = true;
+      const label = options.label ?? PAPER_DESTINATIONS[hash] ?? "La siguiente parada";
+      setDestination(label);
 
-      const beginCrumple = () => {
-        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-        if (reducedMotion.matches) {
-          moveToTarget(hash, target, focusTarget);
+      const begin = async () => {
+        const controller = new AbortController();
+        transitionAbort.current = controller;
+        let committed = false;
+
+        const commitOnce = () => {
+          if (committed) return;
+          committed = true;
+          commitTarget(hash, target);
+        };
+
+        const hardTimer = window.setTimeout(() => controller.abort(), 7600);
+        timers.current.push(hardTimer);
+
+        try {
+          const animated = await runPageCrumpleTransition({
+            signal: controller.signal,
+            onCovered: commitOnce,
+            onPhaseChange: setPhase,
+          });
+          if (!animated) commitOnce();
+        } catch {
+          commitOnce();
+        } finally {
+          window.clearTimeout(hardTimer);
+          commitOnce();
+          focusDestination(target, focusTarget);
+          transitionAbort.current = null;
+          running.current = false;
           setPhase("idle");
-          return;
         }
-
-        setPhase("crumpling");
-        schedule(() => {
-          moveToTarget(hash, target, focusTarget);
-          setPhase("uncrumpling");
-          schedule(() => setPhase("idle"), UNCRUMPLE_MS);
-        }, CRUMPLE_MS);
       };
 
       if (options.delay) {
-        setPhase("idle");
-        schedule(beginCrumple, options.delay);
-        return;
+        schedule(() => void begin(), options.delay);
+      } else {
+        void begin();
       }
-
-      beginCrumple();
     },
-    [clearTimers, moveToTarget, schedule]
+    [clearTimers, commitTarget, focusDestination, schedule]
   );
 
   const navigate = useCallback<PaperNavigationContextValue["navigate"]>(
@@ -135,7 +163,7 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
       const isKeyboardActivation = event.detail === 0;
       const isPrimaryActivation = isKeyboardActivation || event.button === 0;
 
-      if (phase !== "idle") {
+      if (running.current || phase !== "idle") {
         event.preventDefault();
         return;
       }
@@ -158,42 +186,22 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    setMounted(true);
+    const warmup = window.setTimeout(preparePageCrumple, 900);
     return () => {
+      window.clearTimeout(warmup);
+      transitionAbort.current?.abort();
       clearTimers();
+      running.current = false;
       document.documentElement.classList.remove("paper-navigation--jumping");
     };
   }, [clearTimers]);
 
-  const overlay = (
-    <>
-      <div
-        className={`paper-navigation paper-navigation--${phase}`}
-        data-paper-tone={destination.tone}
-        aria-hidden="true"
-      >
-        <div className="paper-navigation__backdrop" />
-        <div className="paper-navigation__crumple">
-          <span className="paper-navigation__ball-shadow" />
-          <span className="paper-navigation__ball-core" />
-          {CRUMPLE_FACETS.map((facet) => (
-            <span
-              className={`paper-navigation__facet paper-navigation__facet--${facet}`}
-              key={facet}
-            />
-          ))}
-        </div>
-      </div>
-      <span className="sr-only" aria-live="polite" aria-atomic="true">
-        {phase === "idle" ? "" : `Desarrugando la comanda para abrir ${destination.label}`}
-      </span>
-    </>
-  );
-
   return (
     <PaperNavigationContext.Provider value={{ navigate }}>
       {children}
-      {mounted ? createPortal(overlay, document.body) : null}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {phase === "idle" ? "" : `${PHASE_MESSAGES[phase]}. Abriendo ${destination}`}
+      </span>
     </PaperNavigationContext.Provider>
   );
 }

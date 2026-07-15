@@ -98,6 +98,7 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
     let touchDragging = false;
     let pointerTargetX = 0;
     let pointerTargetY = 0;
+    let transitionBlocked = false;
 
     try {
       renderer = new THREE.WebGLRenderer({
@@ -484,13 +485,27 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
       loopRunning = false;
     };
     const startLoop = () => {
-      if (!renderer || disposed || loopRunning || document.hidden || !inViewport) return;
+      if (
+        !renderer ||
+        disposed ||
+        loopRunning ||
+        document.hidden ||
+        !inViewport ||
+        transitionBlocked
+      ) return;
       timer.reset();
       renderer.setAnimationLoop(render);
       loopRunning = true;
     };
     const onVisibility = () => {
       if (document.hidden) stopLoop();
+      else startLoop();
+    };
+    const onPaperTransition = (event: Event) => {
+      transitionBlocked = Boolean(
+        (event as CustomEvent<{ active?: boolean }>).detail?.active
+      );
+      if (transitionBlocked) stopLoop();
       else startLoop();
     };
     const intersectionObserver = new IntersectionObserver(
@@ -508,6 +523,7 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
     host.addEventListener("pointercancel", onPointerUp);
     host.addEventListener("pointerleave", onPointerLeave);
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("tonalli:paper-transition", onPaperTransition);
     intersectionObserver.observe(host);
     startLoop();
 
@@ -520,6 +536,7 @@ export function CoffeePourScene({ onReady = () => undefined }: CoffeePourScenePr
       host.removeEventListener("pointercancel", onPointerUp);
       host.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("tonalli:paper-transition", onPaperTransition);
       intersectionObserver.disconnect();
       resizeObserver.disconnect();
       timer.dispose();
