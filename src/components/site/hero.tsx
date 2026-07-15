@@ -108,9 +108,9 @@ export function Hero() {
                   <span
                     className={`hero-letter hero-letter--${index + 1}`}
                     data-aroma={letter === "É" ? "true" : undefined}
-                  key={`${letter}-${index}`}
-                  style={{ "--coffee-letter-delay": `${190 + index * 44}ms` } as LetterAnimationStyle}
-                >
+                    key={`${letter}-${index}`}
+                    style={{ "--coffee-letter-delay": `${190 + index * 44}ms` } as LetterAnimationStyle}
+                  >
                     <span className="hero-letter__glyph">{letter}</span>
                   </span>
                 ))}
@@ -121,9 +121,9 @@ export function Hero() {
                 {TONALLI_LETTERS.map((letter, index) => (
                   <span
                     className={`hero-letter hero-letter--${index + 1}`}
-                  key={`${letter}-${index}`}
-                  style={{ "--coffee-letter-delay": `${390 + index * 44}ms` } as LetterAnimationStyle}
-                >
+                    key={`${letter}-${index}`}
+                    style={{ "--coffee-letter-delay": `${390 + index * 44}ms` } as LetterAnimationStyle}
+                  >
                     <span className="hero-letter__glyph">{letter}</span>
                   </span>
                 ))}
