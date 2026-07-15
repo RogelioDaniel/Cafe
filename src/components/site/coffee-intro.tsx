@@ -40,31 +40,19 @@ export function CoffeeIntro() {
   const skipButtonRef = useRef<HTMLButtonElement>(null);
   const finishing = useRef(false);
   const reducedMotionRef = useRef(false);
-  const initialHashRef = useRef<string | null>(null);
-  const hashRestoredRef = useRef(false);
 
-  const restoreInitialHash = useCallback(() => {
-    const hash = initialHashRef.current;
-    if (!hash || hash === "#inicio" || hashRestoredRef.current) return;
-
-    let target: HTMLElement | null = null;
-    try {
-      target = document.getElementById(decodeURIComponent(hash.slice(1)));
-    } catch {
-      return;
+  const resetToStart = useCallback(() => {
+    const cleanUrl = `${window.location.pathname}${window.location.search}`;
+    if (window.location.hash) {
+      window.history.replaceState(window.history.state, "", cleanUrl);
     }
-    if (!target) return;
 
-    hashRestoredRef.current = true;
-    // The intro locks document scrolling. Restore the deep link only after the
-    // torn sheet is gone, otherwise browsers settle the hash back at the top.
+    document.documentElement.classList.add("paper-navigation--jumping");
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       window.requestAnimationFrame(() => {
-        document.documentElement.classList.add("paper-navigation--jumping");
-        target?.scrollIntoView({ block: "start", behavior: "auto" });
-        window.requestAnimationFrame(() => {
-          document.documentElement.classList.remove("paper-navigation--jumping");
-        });
+        document.documentElement.classList.remove("paper-navigation--jumping");
       });
     });
   }, []);
@@ -84,21 +72,22 @@ export function CoffeeIntro() {
       document.documentElement.style.removeProperty("overflow");
       document.body.style.removeProperty("overflow");
       document.querySelector<HTMLElement>(".tonalli-site-stage")?.removeAttribute("inert");
-      restoreInitialHash();
+      resetToStart();
       if (hardTimer.current) clearTimeout(hardTimer.current);
     }, reducedMotionRef.current ? 40 : EXIT_MS);
-  }, [restoreInitialHash]);
+  }, [resetToStart]);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const previousScrollRestoration = window.history.scrollRestoration;
     const randomValues = new Uint32Array(3);
     window.crypto.getRandomValues(randomValues);
     setCupModel(CUP_MODELS[randomValues[0] % CUP_MODELS.length]);
     setIntroTone(INTRO_TONES[randomValues[1] % INTRO_TONES.length]);
     setCupMood(CUP_MOODS[randomValues[2] % CUP_MOODS.length]);
     reducedMotionRef.current = reducedMotion.matches;
-    initialHashRef.current = window.location.hash || null;
-    hashRestoredRef.current = false;
+    window.history.scrollRestoration = "manual";
+    resetToStart();
     document.documentElement.classList.remove("tonalli-intro-seen");
     document.documentElement.classList.remove("tonalli-hero-ready");
     document.documentElement.classList.remove("tonalli-intro-tearing");
@@ -122,7 +111,7 @@ export function CoffeeIntro() {
       document.documentElement.style.removeProperty("overflow");
       document.body.style.removeProperty("overflow");
       document.querySelector<HTMLElement>(".tonalli-site-stage")?.removeAttribute("inert");
-      restoreInitialHash();
+      resetToStart();
     }, HARD_TIMEOUT_MS);
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -131,6 +120,13 @@ export function CoffeeIntro() {
       skipButtonRef.current?.focus({ preventScroll: true });
     };
     document.addEventListener("keydown", onKeyDown);
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      window.history.scrollRestoration = "manual";
+      resetToStart();
+    };
+    window.addEventListener("pageshow", onPageShow);
 
     const onMotionChange = (event: MediaQueryListEvent) => {
       reducedMotionRef.current = event.matches;
@@ -141,6 +137,8 @@ export function CoffeeIntro() {
     return () => {
       reducedMotion.removeEventListener("change", onMotionChange);
       document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("pageshow", onPageShow);
+      window.history.scrollRestoration = previousScrollRestoration;
       if (exitTimer.current) clearTimeout(exitTimer.current);
       if (hideTimer.current) clearTimeout(hideTimer.current);
       if (hardTimer.current) clearTimeout(hardTimer.current);
@@ -149,7 +147,7 @@ export function CoffeeIntro() {
       document.body.style.removeProperty("overflow");
       document.querySelector<HTMLElement>(".tonalli-site-stage")?.removeAttribute("inert");
     };
-  }, [finish, restoreInitialHash]);
+  }, [finish, resetToStart]);
 
   if (phase === "hidden") return null;
 

@@ -2445,7 +2445,7 @@ body:has(.coffee-intro) {
   }
 }
 
-/* === Paper-fold navigation: one comanda carries visitors between sections === */
+/* === Crumpled-comanda navigation: paper becomes a ball, then reveals the section === */
 html.paper-navigation--jumping {
   scroll-behavior: auto !important;
 }
@@ -2455,18 +2455,20 @@ html.paper-navigation--jumping {
   --paper-ink: #1d2059;
   --paper-rule: rgba(29, 32, 89, 0.18);
   --paper-accent: #ef8532;
+  --facet-scale-x: 0.34;
+  --facet-scale-y: 0.58;
   position: fixed;
   z-index: 180;
   inset: 0;
   visibility: hidden;
   overflow: hidden;
   pointer-events: none;
-  perspective: 1500px;
 }
 
-.paper-navigation--folding,
-.paper-navigation--unfolding {
+.paper-navigation--crumpling,
+.paper-navigation--uncrumpling {
   visibility: visible;
+  pointer-events: auto;
 }
 
 .paper-navigation[data-paper-tone="azul"] {
@@ -2505,208 +2507,339 @@ html.paper-navigation--jumping {
   --paper-accent: #f3df4d;
 }
 
-.paper-navigation__sheet {
-  position: absolute;
-  z-index: 1;
-  inset: -1px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  overflow: visible;
-  perspective: 920px;
-  transform-style: preserve-3d;
-}
-
-.paper-navigation__veil {
+.paper-navigation__backdrop {
   position: absolute;
   z-index: 0;
   inset: 0;
-  clip-path: inset(0);
-  background-color: color-mix(in srgb, var(--paper-ink) 86%, var(--paper-sheet));
+  clip-path: circle(0 at 50% 50%);
+  background-color: color-mix(in srgb, var(--paper-ink) 88%, var(--paper-sheet));
   background-image:
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--paper-accent) 28%, transparent) 0 1px, transparent 1.5px),
-    linear-gradient(115deg, transparent 0 46%, rgba(255, 248, 216, 0.05) 48% 52%, transparent 54% 100%);
-  background-size: 1rem 1rem, 2.4rem 2.4rem;
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--paper-accent) 22%, transparent) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.22), transparent 58%);
+  background-size: 1rem 1rem, 100% 100%;
   opacity: 0;
 }
 
-.paper-navigation--folding .paper-navigation__veil {
-  animation: paper-nav-veil-in 520ms ease-out both;
+.paper-navigation--crumpling .paper-navigation__backdrop {
+  animation: paper-crumple-backdrop-in 610ms cubic-bezier(0.7, 0, 0.25, 1) both;
 }
 
-.paper-navigation--unfolding .paper-navigation__veil {
-  animation: paper-nav-veil-reveal 650ms cubic-bezier(0.76, 0, 0.24, 1) both;
+.paper-navigation--uncrumpling .paper-navigation__backdrop {
+  animation: paper-crumple-backdrop-out 760ms cubic-bezier(0.76, 0, 0.24, 1) both;
 }
 
-.paper-navigation__panel {
-  --fold-x: 0%;
-  --fold-angle: 0deg;
-  --fold-delay: 0ms;
-  --unfold-delay: 0ms;
-  --panel-shadow-x: 0px;
-  position: relative;
-  display: block;
-  overflow: hidden;
-  box-sizing: border-box;
-  min-width: 0;
-  border-block: 3px solid var(--paper-ink);
-  border-right: 1px solid color-mix(in srgb, var(--paper-ink) 68%, transparent);
+.paper-navigation__crumple {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.paper-navigation__crumple::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0;
   background-color: var(--paper-sheet);
   background-image:
-    linear-gradient(90deg, transparent 0 68%, rgba(29, 32, 89, 0.1) 82%, rgba(29, 32, 89, 0.28) 100%),
-    repeating-linear-gradient(to bottom, transparent 0 2rem, var(--paper-rule) 2rem 2.08rem),
-    radial-gradient(circle at 1.15rem 1.1rem, var(--paper-ink) 0 1.4px, transparent 1.7px);
-  background-size: 100% 100%, 100% 2.08rem, 1.1rem 1.1rem;
-  transform: translateX(0) rotateY(0deg);
-  transform-origin: center;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  will-change: transform, opacity, filter;
+    linear-gradient(24deg, transparent 0 47%, rgba(29, 32, 89, 0.17) 49%, rgba(255, 255, 255, 0.2) 51%, transparent 54% 100%),
+    linear-gradient(151deg, transparent 0 45%, rgba(29, 32, 89, 0.13) 49%, rgba(255, 255, 255, 0.16) 52%, transparent 56% 100%),
+    radial-gradient(circle at 1rem 1rem, var(--paper-ink) 0 1.25px, transparent 1.6px);
+  background-size: 100% 100%, 100% 100%, 1.05rem 1.05rem;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.paper-navigation__panel::after {
+.paper-navigation--crumpling .paper-navigation__crumple::before {
+  animation: paper-surface-crumple 360ms ease-in both;
+}
+
+.paper-navigation__facet {
+  --facet-left: 0%;
+  --facet-top: 0%;
+  --crumple-x: 0vw;
+  --crumple-y: 0vh;
+  --crumple-rotate: 0deg;
+  --crumple-rotate-x: 0deg;
+  --crumple-delay: 0ms;
+  --uncrumple-delay: 0ms;
+  --crease-angle: 32deg;
+  --facet-clip: polygon(8% 15%, 53% 0, 94% 12%, 100% 54%, 83% 94%, 45% 100%, 4% 82%, 0 38%);
+  position: absolute;
+  z-index: 3;
+  left: var(--facet-left);
+  top: var(--facet-top);
+  width: 34%;
+  height: 26%;
+  overflow: hidden;
+  background-color: var(--paper-sheet);
+  background-image:
+    linear-gradient(var(--crease-angle), transparent 0 43%, rgba(29, 32, 89, 0.3) 48%, rgba(255, 255, 255, 0.24) 52%, transparent 57% 100%),
+    linear-gradient(calc(var(--crease-angle) + 79deg), transparent 0 45%, rgba(29, 32, 89, 0.2) 49%, rgba(255, 255, 255, 0.2) 52%, transparent 56% 100%),
+    radial-gradient(circle at 1rem 1rem, var(--paper-ink) 0 1.25px, transparent 1.6px);
+  background-size: 100% 100%, 100% 100%, 1.05rem 1.05rem;
+  clip-path: polygon(0 0, 50% 0, 100% 0, 100% 50%, 100% 100%, 50% 100%, 0 100%, 0 50%);
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotateZ(0deg) rotateX(0deg) scale3d(1, 1, 1);
+  transform-origin: center;
+  backface-visibility: hidden;
+}
+
+.paper-navigation__facet::after {
   content: "";
   position: absolute;
   inset: 0;
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.28), transparent 28% 67%, rgba(29, 32, 89, 0.34)),
+    radial-gradient(circle at 46% 54%, transparent 0 28%, rgba(29, 32, 89, 0.14) 62%, transparent 78%);
+  opacity: 0.28;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(29, 32, 89, 0.36), transparent 24%, transparent 72%, rgba(29, 32, 89, 0.42));
-  opacity: 0.22;
 }
 
-.paper-navigation__panel--1::before {
-  content: "";
+.paper-navigation--crumpling .paper-navigation__facet {
+  will-change: transform, clip-path, filter;
+  animation: paper-facet-crumple 620ms cubic-bezier(0.72, 0, 0.2, 1) var(--crumple-delay) both;
+}
+
+.paper-navigation--uncrumpling .paper-navigation__facet {
+  will-change: transform, clip-path, opacity, filter;
+  animation: paper-facet-uncrumple 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--uncrumple-delay) both;
+}
+
+.paper-navigation__facet--1 {
+  --facet-left: 0%; --facet-top: 0%;
+  --crumple-x: calc(33.33vw - 1.8vmin); --crumple-y: calc(37.5vh - 1.1vmin);
+  --crumple-rotate: -24deg; --crumple-rotate-x: 19deg;
+  --crumple-delay: 0ms; --uncrumple-delay: 72ms; --crease-angle: 18deg;
+}
+
+.paper-navigation__facet--2 {
+  --facet-left: 33%; --facet-top: 0%;
+  --crumple-x: 1.1vmin; --crumple-y: calc(37.5vh - 2vmin);
+  --crumple-rotate: 17deg; --crumple-rotate-x: -23deg;
+  --crumple-delay: 16ms; --uncrumple-delay: 60ms; --crease-angle: 71deg;
+  --facet-clip: polygon(3% 22%, 45% 1%, 91% 8%, 100% 48%, 88% 91%, 51% 100%, 8% 86%, 0 43%);
+}
+
+.paper-navigation__facet--3 {
+  --facet-left: 66%; --facet-top: 0%;
+  --crumple-x: calc(-33.33vw + 1.6vmin); --crumple-y: calc(37.5vh - 0.6vmin);
+  --crumple-rotate: -13deg; --crumple-rotate-x: 25deg;
+  --crumple-delay: 34ms; --uncrumple-delay: 48ms; --crease-angle: 126deg;
+  --facet-clip: polygon(12% 7%, 58% 0, 96% 20%, 100% 61%, 77% 100%, 39% 92%, 0 76%, 4% 31%);
+}
+
+.paper-navigation__facet--4 {
+  --facet-left: 0%; --facet-top: 25%;
+  --crumple-x: calc(33.33vw + 1.7vmin); --crumple-y: calc(12.5vh + 1.1vmin);
+  --crumple-rotate: 29deg; --crumple-rotate-x: -16deg;
+  --crumple-delay: 52ms; --uncrumple-delay: 36ms; --crease-angle: 42deg;
+  --facet-clip: polygon(0 18%, 41% 0, 89% 11%, 100% 43%, 92% 84%, 48% 100%, 9% 90%, 3% 55%);
+}
+
+.paper-navigation__facet--5 {
+  --facet-left: 33%; --facet-top: 25%;
+  --crumple-x: -1.5vmin; --crumple-y: calc(12.5vh + 1.8vmin);
+  --crumple-rotate: -32deg; --crumple-rotate-x: 21deg;
+  --crumple-delay: 72ms; --uncrumple-delay: 24ms; --crease-angle: 104deg;
+  --facet-clip: polygon(9% 4%, 61% 7%, 100% 27%, 91% 66%, 72% 100%, 31% 91%, 0 69%, 2% 29%);
+}
+
+.paper-navigation__facet--6 {
+  --facet-left: 66%; --facet-top: 25%;
+  --crumple-x: calc(-33.33vw - 0.3vmin); --crumple-y: calc(12.5vh - 1.7vmin);
+  --crumple-rotate: 14deg; --crumple-rotate-x: -27deg;
+  --crumple-delay: 58ms; --uncrumple-delay: 12ms; --crease-angle: 151deg;
+  --facet-clip: polygon(5% 14%, 47% 0, 88% 16%, 100% 58%, 79% 93%, 38% 100%, 4% 79%, 0 42%);
+}
+
+.paper-navigation__facet--7 {
+  --facet-left: 0%; --facet-top: 50%;
+  --crumple-x: calc(33.33vw - 1vmin); --crumple-y: calc(-12.5vh + 1.4vmin);
+  --crumple-rotate: 25deg; --crumple-rotate-x: 18deg;
+  --crumple-delay: 44ms; --uncrumple-delay: 0ms; --crease-angle: 63deg;
+  --facet-clip: polygon(14% 0, 54% 8%, 94% 4%, 100% 44%, 88% 88%, 43% 100%, 0 76%, 6% 35%);
+}
+
+.paper-navigation__facet--8 {
+  --facet-left: 33%; --facet-top: 50%;
+  --crumple-x: 1.8vmin; --crumple-y: calc(-12.5vh - 1.2vmin);
+  --crumple-rotate: -18deg; --crumple-rotate-x: -19deg;
+  --crumple-delay: 30ms; --uncrumple-delay: 14ms; --crease-angle: 137deg;
+  --facet-clip: polygon(3% 13%, 39% 0, 91% 7%, 100% 38%, 95% 82%, 52% 100%, 10% 92%, 0 52%);
+}
+
+.paper-navigation__facet--9 {
+  --facet-left: 66%; --facet-top: 50%;
+  --crumple-x: calc(-33.33vw + 0.8vmin); --crumple-y: calc(-12.5vh - 1.8vmin);
+  --crumple-rotate: 34deg; --crumple-rotate-x: 14deg;
+  --crumple-delay: 64ms; --uncrumple-delay: 28ms; --crease-angle: 27deg;
+  --facet-clip: polygon(7% 6%, 56% 0, 100% 22%, 91% 61%, 82% 96%, 36% 100%, 0 71%, 4% 31%);
+}
+
+.paper-navigation__facet--10 {
+  --facet-left: 0%; --facet-top: 75%;
+  --crumple-x: calc(33.33vw - 1.7vmin); --crumple-y: calc(-37.5vh + 1.1vmin);
+  --crumple-rotate: -28deg; --crumple-rotate-x: -22deg;
+  --crumple-delay: 48ms; --uncrumple-delay: 42ms; --crease-angle: 116deg;
+  --facet-clip: polygon(11% 0, 49% 4%, 92% 14%, 100% 51%, 84% 91%, 42% 100%, 6% 83%, 0 36%);
+}
+
+.paper-navigation__facet--11 {
+  --facet-left: 33%; --facet-top: 75%;
+  --crumple-x: -0.4vmin; --crumple-y: calc(-37.5vh - 1.9vmin);
+  --crumple-rotate: 22deg; --crumple-rotate-x: 20deg;
+  --crumple-delay: 26ms; --uncrumple-delay: 56ms; --crease-angle: 49deg;
+  --facet-clip: polygon(4% 19%, 48% 0, 87% 10%, 100% 49%, 90% 90%, 55% 100%, 9% 84%, 0 45%);
+}
+
+.paper-navigation__facet--12 {
+  --facet-left: 66%; --facet-top: 75%;
+  --crumple-x: calc(-33.33vw + 1.4vmin); --crumple-y: calc(-37.5vh + 0.5vmin);
+  --crumple-rotate: -15deg; --crumple-rotate-x: -18deg;
+  --crumple-delay: 10ms; --uncrumple-delay: 70ms; --crease-angle: 164deg;
+  --facet-clip: polygon(8% 8%, 61% 0, 96% 17%, 100% 57%, 75% 100%, 34% 91%, 0 77%, 2% 32%);
+}
+
+.paper-navigation__ball-core {
   position: absolute;
   z-index: 2;
-  inset: 0 auto 0 clamp(1.35rem, 3vw, 2.15rem);
-  width: 2px;
-  background: color-mix(in srgb, var(--paper-accent) 76%, var(--paper-ink));
-  opacity: 0.68;
-}
-
-.paper-navigation__panel--1 {
-  --fold-x: 150%;
-  --fold-angle: -83deg;
-  --fold-delay: 0ms;
-  --unfold-delay: 105ms;
-  --panel-shadow-x: 18px;
-  border-left: 3px solid var(--paper-ink);
-}
-
-.paper-navigation__panel--2 {
-  --fold-x: 50%;
-  --fold-angle: 79deg;
-  --fold-delay: 40ms;
-  --unfold-delay: 70ms;
-  --panel-shadow-x: -14px;
+  top: 50%;
+  left: 50%;
+  width: clamp(5.5rem, 16vmin, 10.5rem);
+  aspect-ratio: 1;
+  border: 2px solid color-mix(in srgb, var(--paper-ink) 70%, transparent);
+  border-radius: 43% 57% 49% 51% / 56% 39% 61% 44%;
+  background-color: var(--paper-sheet);
   background-image:
-    linear-gradient(90deg, rgba(29, 32, 89, 0.22), transparent 30%, transparent 76%, rgba(29, 32, 89, 0.1)),
-    repeating-linear-gradient(to bottom, transparent 0 2rem, var(--paper-rule) 2rem 2.08rem),
-    radial-gradient(circle at 1.15rem 1.1rem, var(--paper-ink) 0 1.4px, transparent 1.7px);
-}
-
-.paper-navigation__panel--3 {
-  --fold-x: -50%;
-  --fold-angle: -79deg;
-  --fold-delay: 80ms;
-  --unfold-delay: 35ms;
-  --panel-shadow-x: 14px;
-}
-
-.paper-navigation__panel--4 {
-  --fold-x: -150%;
-  --fold-angle: 83deg;
-  --fold-delay: 120ms;
-  --unfold-delay: 0ms;
-  --panel-shadow-x: -18px;
-  border-right: 3px solid var(--paper-ink);
-  background-image:
-    linear-gradient(90deg, rgba(29, 32, 89, 0.2), transparent 32%, transparent 72%, rgba(29, 32, 89, 0.24)),
-    repeating-linear-gradient(to bottom, transparent 0 2rem, var(--paper-rule) 2rem 2.08rem),
-    radial-gradient(circle at 1.15rem 1.1rem, var(--paper-ink) 0 1.4px, transparent 1.7px);
-}
-
-.paper-navigation--folding .paper-navigation__panel {
-  animation: paper-nav-accordion-fold 500ms cubic-bezier(0.72, 0, 0.24, 1) var(--fold-delay) both;
-}
-
-.paper-navigation--unfolding .paper-navigation__panel {
-  animation: paper-nav-accordion-unfold 620ms cubic-bezier(0.16, 1, 0.3, 1) var(--unfold-delay) both;
-}
-
-.paper-navigation__spine {
-  position: absolute;
-  z-index: 5;
-  inset: 2.5% auto 2.5% 50%;
-  width: clamp(0.65rem, 1.5vw, 1.25rem);
-  border: 2px solid var(--paper-ink);
-  border-radius: 0.2rem;
-  background: var(--paper-sheet);
-  box-shadow: -1.1rem 0 1.6rem rgba(0, 0, 0, 0.34), 1.1rem 0 1.6rem rgba(0, 0, 0, 0.34);
+    radial-gradient(circle at 31% 24%, rgba(255, 255, 255, 0.58), transparent 24%),
+    radial-gradient(circle at 69% 73%, rgba(29, 32, 89, 0.34), transparent 36%),
+    linear-gradient(137deg, transparent 0 42%, rgba(29, 32, 89, 0.24) 47%, rgba(255, 255, 255, 0.22) 52%, transparent 57% 100%);
+  box-shadow: inset 0.65rem 0.45rem 1rem rgba(255, 255, 255, 0.24), inset -0.8rem -0.6rem 1.15rem rgba(29, 32, 89, 0.3);
   opacity: 0;
-  transform: translateX(-50%) scaleY(0.94);
-  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(-14deg) scale(0.4);
 }
 
-.paper-navigation--folding .paper-navigation__spine {
-  animation: paper-nav-spine-in 660ms ease-out both;
+.paper-navigation__ball-core::before,
+.paper-navigation__ball-core::after {
+  content: "";
+  position: absolute;
+  inset: 8% 2% 4% 10%;
+  border-radius: 58% 42% 55% 45% / 38% 57% 43% 62%;
+  background: linear-gradient(48deg, rgba(29, 32, 89, 0.22), transparent 43%, rgba(255, 255, 255, 0.26) 51%, transparent 64%);
+  transform: rotate(31deg);
 }
 
-.paper-navigation--unfolding .paper-navigation__spine {
-  animation: paper-nav-spine-out 430ms ease-in both;
+.paper-navigation__ball-core::after {
+  inset: 3% 10% 12% 3%;
+  transform: rotate(-42deg);
 }
 
-@keyframes paper-nav-accordion-fold {
-  from {
-    opacity: 1;
+.paper-navigation__ball-shadow {
+  position: absolute;
+  z-index: 1;
+  top: calc(50% + clamp(3.2rem, 9vmin, 5.8rem));
+  left: 50%;
+  width: clamp(5rem, 18vmin, 11rem);
+  height: clamp(0.7rem, 2.5vmin, 1.5rem);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.48);
+  filter: blur(0.55rem);
+  opacity: 0;
+  transform: translateX(-50%) scaleX(0.45);
+}
+
+.paper-navigation--crumpling .paper-navigation__ball-core {
+  animation: paper-ball-form 720ms cubic-bezier(0.72, 0, 0.2, 1) both;
+}
+
+.paper-navigation--uncrumpling .paper-navigation__ball-core {
+  animation: paper-ball-open 430ms ease-out both;
+}
+
+.paper-navigation--crumpling .paper-navigation__ball-shadow {
+  animation: paper-ball-shadow-in 720ms ease-out both;
+}
+
+.paper-navigation--uncrumpling .paper-navigation__ball-shadow {
+  animation: paper-ball-shadow-out 360ms ease-in both;
+}
+
+@keyframes paper-facet-crumple {
+  0%, 16% {
+    clip-path: polygon(0 0, 50% 0, 100% 0, 100% 50%, 100% 100%, 50% 100%, 0 100%, 0 50%);
     filter: drop-shadow(0 0 0 transparent);
-    transform: translateX(0) rotateY(0deg);
-  }
-  to {
-    opacity: 1;
-    filter: drop-shadow(var(--panel-shadow-x) 0 1.15rem rgba(0, 0, 0, 0.5));
-    transform: translateX(var(--fold-x)) rotateY(var(--fold-angle));
-  }
-}
-
-@keyframes paper-nav-accordion-unfold {
-  0%, 24% {
-    opacity: 1;
-    filter: drop-shadow(var(--panel-shadow-x) 0 1.15rem rgba(0, 0, 0, 0.5));
-    transform: translateX(var(--fold-x)) rotateY(var(--fold-angle));
-  }
-  72% {
-    opacity: 0.56;
+    transform: translate3d(0, 0, 0) rotateZ(0deg) rotateX(0deg) scale3d(1, 1, 1);
   }
   100% {
-    opacity: 0;
-    filter: drop-shadow(0 0 0 transparent);
-    transform: translateX(0) rotateY(0deg);
+    clip-path: var(--facet-clip);
+    filter: drop-shadow(0.25rem 0.45rem 0.55rem rgba(0, 0, 0, 0.46));
+    transform: translate3d(var(--crumple-x), var(--crumple-y), 2rem)
+      rotateZ(var(--crumple-rotate)) rotateX(var(--crumple-rotate-x))
+      scale3d(var(--facet-scale-x), var(--facet-scale-y), 1);
   }
 }
 
-@keyframes paper-nav-veil-in {
-  0%, 18% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes paper-nav-veil-reveal {
+@keyframes paper-facet-uncrumple {
   0%, 12% {
-    clip-path: inset(0);
+    clip-path: var(--facet-clip);
+    filter: drop-shadow(0.25rem 0.45rem 0.55rem rgba(0, 0, 0, 0.46));
     opacity: 1;
+    transform: translate3d(var(--crumple-x), var(--crumple-y), 2rem)
+      rotateZ(var(--crumple-rotate)) rotateX(var(--crumple-rotate-x))
+      scale3d(var(--facet-scale-x), var(--facet-scale-y), 1);
   }
+  70% { opacity: 1; }
   100% {
-    clip-path: inset(0 49.4%);
+    clip-path: polygon(0 0, 50% 0, 100% 0, 100% 50%, 100% 100%, 50% 100%, 0 100%, 0 50%);
+    filter: drop-shadow(0 0 0 transparent);
     opacity: 0;
+    transform: translate3d(0, 0, 0) rotateZ(0deg) rotateX(0deg) scale3d(1, 1, 1);
   }
 }
 
-@keyframes paper-nav-spine-in {
-  0%, 58% { opacity: 0; transform: translateX(-50%) scaleY(0.9); }
-  100% { opacity: 1; transform: translateX(-50%) scaleY(0.96); }
+@keyframes paper-crumple-backdrop-in {
+  0%, 10% { clip-path: circle(0 at 50% 50%); opacity: 0; }
+  100% { clip-path: circle(150% at 50% 50%); opacity: 1; }
 }
 
-@keyframes paper-nav-spine-out {
-  from { opacity: 1; transform: translateX(-50%) scaleY(0.96); }
-  to { opacity: 0; transform: translateX(-50%) scaleY(1); }
+@keyframes paper-surface-crumple {
+  0%, 14% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes paper-crumple-backdrop-out {
+  0%, 58% { clip-path: circle(150% at 50% 50%); opacity: 1; }
+  100% { clip-path: circle(0 at 50% 50%); opacity: 0; }
+}
+
+@keyframes paper-ball-form {
+  0%, 62% { opacity: 0; transform: translate(-50%, -50%) rotate(-14deg) scale(0.4); }
+  82% { opacity: 0.88; transform: translate(-50%, -50%) rotate(8deg) scale(1.08); }
+  100% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+}
+
+@keyframes paper-ball-open {
+  0%, 18% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(19deg) scale(1.22); }
+}
+
+@keyframes paper-ball-shadow-in {
+  0%, 62% { opacity: 0; transform: translateX(-50%) scaleX(0.45); }
+  100% { opacity: 0.62; transform: translateX(-50%) scaleX(1); }
+}
+
+@keyframes paper-ball-shadow-out {
+  from { opacity: 0.62; transform: translateX(-50%) scaleX(1); }
+  to { opacity: 0; transform: translateX(-50%) scaleX(1.3); }
+}
+
+@media (orientation: portrait) {
+  .paper-navigation {
+    --facet-scale-x: 0.72;
+    --facet-scale-y: 0.48;
+  }
 }
 
 /* === Custom utilities === */

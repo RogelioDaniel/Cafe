@@ -13,11 +13,11 @@ import {
 import { createPortal } from "react-dom";
 
 type PaperTone = "azul" | "barro" | "crema" | "hoja" | "maiz" | "bugambilia";
-type PaperPhase = "idle" | "folding" | "unfolding";
+type PaperPhase = "idle" | "crumpling" | "uncrumpling";
 
 type PaperNavigationOptions = {
   label?: string;
-  /** Lets the mobile sheet close before the paper covers the page. */
+  /** Lets the mobile sheet close before the crumpled paper covers the page. */
   delay?: number;
 };
 
@@ -31,8 +31,9 @@ type PaperNavigationContextValue = {
 
 const PaperNavigationContext = createContext<PaperNavigationContextValue | null>(null);
 
-const FOLD_MS = 660;
-const UNFOLD_MS = 760;
+const CRUMPLE_MS = 720;
+const UNCRUMPLE_MS = 840;
+const CRUMPLE_FACETS = Array.from({ length: 12 }, (_, index) => index + 1);
 
 const PAPER_DESTINATIONS: Record<string, { label: string; tone: PaperTone }> = {
   "#inicio": { label: "El comal abre", tone: "azul" },
@@ -99,7 +100,7 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
       };
       setDestination({ ...nextDestination, label: options.label ?? nextDestination.label });
 
-      const beginFold = () => {
+      const beginCrumple = () => {
         const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
         if (reducedMotion.matches) {
           moveToTarget(hash, target, focusTarget);
@@ -107,21 +108,21 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        setPhase("folding");
+        setPhase("crumpling");
         schedule(() => {
           moveToTarget(hash, target, focusTarget);
-          setPhase("unfolding");
-          schedule(() => setPhase("idle"), UNFOLD_MS);
-        }, FOLD_MS);
+          setPhase("uncrumpling");
+          schedule(() => setPhase("idle"), UNCRUMPLE_MS);
+        }, CRUMPLE_MS);
       };
 
       if (options.delay) {
         setPhase("idle");
-        schedule(beginFold, options.delay);
+        schedule(beginCrumple, options.delay);
         return;
       }
 
-      beginFold();
+      beginCrumple();
     },
     [clearTimers, moveToTarget, schedule]
   );
@@ -133,6 +134,11 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
       const isModified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
       const isKeyboardActivation = event.detail === 0;
       const isPrimaryActivation = isKeyboardActivation || event.button === 0;
+
+      if (phase !== "idle") {
+        event.preventDefault();
+        return;
+      }
 
       if (
         event.defaultPrevented ||
@@ -148,7 +154,7 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
       event.preventDefault();
       startNavigation(hash, target, options, isKeyboardActivation);
     },
-    [startNavigation]
+    [phase, startNavigation]
   );
 
   useEffect(() => {
@@ -166,17 +172,20 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
         data-paper-tone={destination.tone}
         aria-hidden="true"
       >
-        <div className="paper-navigation__veil" />
-        <div className="paper-navigation__sheet">
-          <span className="paper-navigation__panel paper-navigation__panel--1" />
-          <span className="paper-navigation__panel paper-navigation__panel--2" />
-          <span className="paper-navigation__panel paper-navigation__panel--3" />
-          <span className="paper-navigation__panel paper-navigation__panel--4" />
-          <span className="paper-navigation__spine" />
+        <div className="paper-navigation__backdrop" />
+        <div className="paper-navigation__crumple">
+          <span className="paper-navigation__ball-shadow" />
+          <span className="paper-navigation__ball-core" />
+          {CRUMPLE_FACETS.map((facet) => (
+            <span
+              className={`paper-navigation__facet paper-navigation__facet--${facet}`}
+              key={facet}
+            />
+          ))}
         </div>
       </div>
       <span className="sr-only" aria-live="polite" aria-atomic="true">
-        {phase === "idle" ? "" : `Abriendo ${destination.label}`}
+        {phase === "idle" ? "" : `Desarrugando la comanda para abrir ${destination.label}`}
       </span>
     </>
   );
