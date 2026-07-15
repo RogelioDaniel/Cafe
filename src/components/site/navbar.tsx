@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Coffee, Menu, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader, SheetDescription } from "@/components/ui/sheet";
 import { useCart } from "@/lib/cart-store";
 import { LivePill } from "./live-pill";
 import { usePaperNavigation } from "./paper-navigation";
@@ -119,6 +119,9 @@ export function Navbar() {
                 <SheetTitle className="font-display text-left text-xl text-[#1d2059]">
                   Menú
                 </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Navega por las secciones de Café Tonalli.
+                </SheetDescription>
               </SheetHeader>
               <div className="flex flex-col gap-1 p-3">
                 {NAV_LINKS.map((l) => (

@@ -11,6 +11,7 @@ if (!existsSync(standalone)) {
 const targets = [
   [join(root, ".next", "static"), join(standalone, ".next", "static")],
   [join(root, "public"), join(standalone, "public")],
+  [join(root, "db"), join(standalone, "db")],
 ];
 
 for (const [source, destination] of targets) {

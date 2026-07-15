@@ -31,8 +31,8 @@ type PaperNavigationContextValue = {
 
 const PaperNavigationContext = createContext<PaperNavigationContextValue | null>(null);
 
-const FOLD_MS = 240;
-const UNFOLD_MS = 320;
+const FOLD_MS = 360;
+const UNFOLD_MS = 460;
 
 const PAPER_DESTINATIONS: Record<string, { label: string; tone: PaperTone }> = {
   "#inicio": { label: "El comal abre", tone: "azul" },
@@ -166,6 +166,7 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
         data-paper-tone={destination.tone}
         aria-hidden="true"
       >
+        <div className="paper-navigation__cover" />
         <div className="paper-navigation__sheet">
           <span className="paper-navigation__ruled-lines" />
           <span className="paper-navigation__crease" />

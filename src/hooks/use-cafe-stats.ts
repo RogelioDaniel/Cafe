@@ -39,8 +39,13 @@ export function useCafeStats(): UseCafeStatsResult {
         setState((prev) => prev ?? INITIAL_FALLBACK);
       });
 
-    // Connect WebSocket — path "/" with XTransformPort for Caddy gateway
-    const socket = io("/?XTransformPort=3003", {
+    // Vercel does not host the optional Socket.IO process. Only connect when
+    // an external realtime endpoint is explicitly configured; the REST stats
+    // snapshot above remains the reliable fallback for static deployments.
+    const realtimeUrl = process.env.NEXT_PUBLIC_REALTIME_URL?.trim();
+    if (!realtimeUrl) return;
+
+    const socket = io(realtimeUrl, {
       transports: ["websocket", "polling"],
       forceNew: true,
       reconnection: true,

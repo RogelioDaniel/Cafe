@@ -11,6 +11,7 @@ import { formatNumber } from "@/lib/format";
 export function LivePill() {
   const { state, connected } = useCafeStats();
   const [pulse, setPulse] = useState(false);
+  const realtimeConfigured = Boolean(process.env.NEXT_PUBLIC_REALTIME_URL?.trim());
 
   useEffect(() => {
     if (!state) return;
@@ -26,7 +27,13 @@ export function LivePill() {
       className={`hidden items-center gap-1.5 rounded-full border-2 border-[#1d2059] bg-[#fff8d8] px-2.5 py-1 text-xs font-extrabold text-[#1d2059] transition-all lg:flex ${
         pulse ? "ring-2 ring-[#f3df4d]" : ""
       }`}
-      title={connected ? "Conectado en tiempo real" : "Reconectando…"}
+      title={
+        connected
+          ? "Conectado en tiempo real"
+          : realtimeConfigured
+            ? "Conectando con la barra…"
+            : "Último corte disponible"
+      }
     >
       <span className="relative flex h-2 w-2">
         {connected && (
