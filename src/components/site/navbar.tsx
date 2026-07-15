@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { useCart } from "@/lib/cart-store";
 import { LivePill } from "./live-pill";
+import { usePaperNavigation } from "./paper-navigation";
 
 const NAV_LINKS = [
   { href: "#menu", label: "Menú" },
@@ -21,6 +22,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const count = useCart((s) => s.lines.reduce((a, l) => a + l.qty, 0));
   const openCart = useCart((s) => s.open);
+  const { navigate } = usePaperNavigation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -37,6 +39,7 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="#inicio"
+          onClick={(event) => navigate(event, "#inicio", { label: "El comal abre" })}
           className="group flex min-h-11 min-w-0 items-center gap-2 sm:gap-2.5"
           aria-label="Café Tonalli — inicio"
         >
@@ -59,6 +62,7 @@ export function Navbar() {
             <Link
               key={l.href}
               href={l.href}
+              onClick={(event) => navigate(event, l.href, { label: l.label })}
               className="rounded-full border-2 border-transparent px-3 py-2 text-sm font-extrabold text-[#1d2059] transition-all hover:border-[#1d2059] hover:bg-[#fff8d8]"
             >
               {l.label}
@@ -90,7 +94,9 @@ export function Navbar() {
             size="sm"
             className="poster-nav-cta ml-1 hidden h-11 cursor-pointer rounded-lg px-4 font-black sm:inline-flex"
           >
-            <Link href="#reservar">Reservar</Link>
+            <Link href="#reservar" onClick={(event) => navigate(event, "#reservar", { label: "Reservar mesa" })}>
+              Reservar
+            </Link>
           </Button>
 
           {/* Mobile menu */}
@@ -119,7 +125,10 @@ export function Navbar() {
                   <Link
                     key={l.href}
                     href={l.href}
-                    onClick={() => setMobileOpen(false)}
+                    onClick={(event) => {
+                      setMobileOpen(false);
+                      navigate(event, l.href, { label: l.label, delay: 260 });
+                    }}
                     className="flex items-center justify-between rounded-lg border-2 border-transparent px-3 py-3 text-base font-extrabold text-[#1d2059] transition-colors hover:border-[#1d2059] hover:bg-[#b9dcff]"
                   >
                     {l.label}
@@ -129,7 +138,13 @@ export function Navbar() {
                   asChild
                   className="poster-button poster-button--barro mt-3 w-full font-black"
                 >
-                  <Link href="#reservar" onClick={() => setMobileOpen(false)}>
+                  <Link
+                    href="#reservar"
+                    onClick={(event) => {
+                      setMobileOpen(false);
+                      navigate(event, "#reservar", { label: "Reservar mesa", delay: 260 });
+                    }}
+                  >
                     Reservar mesa
                   </Link>
                 </Button>

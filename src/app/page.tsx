@@ -13,6 +13,7 @@ import { AIBarista } from "@/components/site/ai-barista";
 import { CoffeeIntro } from "@/components/site/coffee-intro";
 import { CoffeeRitual } from "@/components/site/coffee-ritual";
 import { CoffeeSectionTransition } from "@/components/site/coffee-section-transition";
+import { PaperNavigationProvider } from "@/components/site/paper-navigation";
 import type { MenuCategoryGroup, MenuItem, MenuCategory, Review } from "@/lib/types";
 
 const CATEGORY_NAMES: Record<MenuCategory, string> = {
@@ -85,7 +86,7 @@ export default async function Home() {
   }));
 
   return (
-    <>
+    <PaperNavigationProvider>
       <CoffeeIntro />
       <div className="tonalli-site-stage">
         <div className="tonalli-site-canvas">
@@ -113,6 +114,6 @@ export default async function Home() {
       {/* Overlays */}
       <CartDrawer />
       <AIBarista />
-    </>
+    </PaperNavigationProvider>
   );
 }

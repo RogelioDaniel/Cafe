@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType, type CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowDownRight, Clock, MapPin, Star } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
@@ -18,6 +18,7 @@ import {
   TonalliTamalDoodle,
   type TonalliDoodleProps,
 } from "./tonalli-doodles";
+import { usePaperNavigation } from "./paper-navigation";
 
 const CAFE_LETTERS = ["C", "A", "F", "É"];
 const TONALLI_LETTERS = ["T", "O", "N", "A", "L", "L", "I"];
@@ -36,6 +37,7 @@ const HERO_CHARACTERS = {
 type CharacterId = keyof typeof HERO_CHARACTERS;
 type CharacterSlot = "lead" | "left" | "right" | "accent";
 type HeroCast = Record<CharacterSlot, CharacterId> & { ariaLabel: string };
+type LetterAnimationStyle = CSSProperties & { "--coffee-letter-delay": string };
 
 const HERO_CASTS: HeroCast[] = [
   { lead: "olla", left: "concha", right: "cup", accent: "bean", ariaLabel: "Olla, concha, taza y grano de café caricaturizados" },
@@ -53,6 +55,7 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const [castIndex, setCastIndex] = useState(0);
   const shouldReduceMotion = useReducedMotion();
+  const { navigate } = usePaperNavigation();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -102,7 +105,12 @@ export function Hero() {
             <span className="hero-title-line" aria-hidden="true">
               <span className="hero-letter-row hero-letter-row--cafe">
                 {CAFE_LETTERS.map((letter, index) => (
-                  <span className={`hero-letter hero-letter--${index + 1}`} key={`${letter}-${index}`}>
+                  <span
+                    className={`hero-letter hero-letter--${index + 1}`}
+                    data-aroma={letter === "É" ? "true" : undefined}
+                    key={`${letter}-${index}`}
+                    style={{ "--coffee-letter-delay": `${190 + index * 44}ms` } as LetterAnimationStyle}
+                  >
                     {letter}
                   </span>
                 ))}
@@ -111,7 +119,11 @@ export function Hero() {
             <span className="hero-title-line" aria-hidden="true">
               <span className="hero-letter-row hero-letter-row--tonalli">
                 {TONALLI_LETTERS.map((letter, index) => (
-                  <span className={`hero-letter hero-letter--${index + 1}`} key={`${letter}-${index}`}>
+                  <span
+                    className={`hero-letter hero-letter--${index + 1}`}
+                    key={`${letter}-${index}`}
+                    style={{ "--coffee-letter-delay": `${390 + index * 44}ms` } as LetterAnimationStyle}
+                  >
                     {letter}
                   </span>
                 ))}
@@ -130,13 +142,15 @@ export function Hero() {
 
           <div className="hero-reveal hero-reveal--actions mt-7 flex flex-wrap items-center gap-3">
             <Button asChild size="lg" className="tonalli-press poster-button poster-button--barro h-12 min-w-44 px-6 text-base font-black">
-              <Link href="#reservar">
+              <Link href="#reservar" onClick={(event) => navigate(event, "#reservar", { label: "Reservar mesa" })}>
                 Apartar mesa
                 <ArrowDownRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="poster-button poster-button--cream h-12 px-6 text-base font-black">
-              <Link href="#menu">Explorar la carta</Link>
+              <Link href="#menu" onClick={(event) => navigate(event, "#menu", { label: "Explorar la carta" })}>
+                Explorar la carta
+              </Link>
             </Button>
           </div>
 
