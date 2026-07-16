@@ -25,6 +25,14 @@ const UNCRUMPLE_DURATION = 1180;
 const CAPTURE_TIMEOUT = 2400;
 const PAPER_INK = 0x1d2059;
 
+// Performance: el papel se arruga hasta una bola, así que la resolución de la
+// textura es irrelevante cuando está deformado. Capar los píxeles recortes de
+// golpe el coste de `domToCanvas` (que rasteriza en el hilo principal) y la
+// memoria/subida a la GPU, que son la causa real de los tirones.
+const CAPTURE_DPR_CAP = 1.0; // antes se podía ir hasta 1.25
+const CAPTURE_EDGE_CAP = 1600; // lado largo máximo de la textura de captura
+const CAPTURE_DPR_FLOOR = 0.6; // mínimo para que pantallas pequeñas no se vean blandas
+
 let modulePromise: Promise<[ThreeModule, CaptureModule]> | null = null;
 
 const vertexShader = /* glsl */ `
@@ -406,10 +414,16 @@ async function captureViewport(
   const root = document.documentElement;
   const width = root.clientWidth;
   const height = window.innerHeight;
-  const scale = Math.max(
-    0.75,
-    Math.min(window.devicePixelRatio || 1, 1.25, 2048 / Math.max(width, height))
+  const longestEdge = Math.max(width, height);
+  // Performance: la textura solo se ve nítida al inicio/final (papel plano).
+  // Durante el arrugado casi no se distingue, así que limitamos píxeles de
+  // captura para que `domToCanvas` no bloquee el hilo principal.
+  const dprScale = Math.min(
+    CAPTURE_DPR_CAP,
+    window.devicePixelRatio || 1,
+    CAPTURE_EDGE_CAP / longestEdge
   );
+  const scale = Math.max(CAPTURE_DPR_FLOOR, dprScale);
 
   await Promise.race([document.fonts?.ready ?? Promise.resolve(), wait(320, signal)]);
 
@@ -700,7 +714,15 @@ export async function runPageCrumpleTransition({
       renderer.render(scene, camera);
     };
 
+    // Performance: precompila el programa GLSL y fuerza la subida de la
+    // textura a la GPU antes de animar. Sin esto, el primer frame de la
+    // animación arrastra el coste de compilar el shader + subir la textura
+    // (cientos de ms en algunos drivers), lo que se siente como un tirón.
     render(0, 0, false);
+    if (typeof renderer.compile === "function") {
+      renderer.compile(scene, camera);
+    }
+    sourceTexture.needsUpdate = true;
     await nextFrame(signal);
     onPhaseChange("crumpling");
     await animateValue(0, 1, CRUMPLE_DURATION, signal, (progress, elapsed) => {
@@ -715,6 +737,7 @@ export async function runPageCrumpleTransition({
     await waitForViewportAssets(signal);
     targetCanvas = await captureViewport(domToCanvas, signal);
     targetTexture = createTexture(THREE, targetCanvas);
+    targetTexture.needsUpdate = true;
     material.uniforms.uTargetMap.value = targetTexture;
 
     await animateValue(0, 1, TEXTURE_SWAP_DURATION, signal, (mix) => {
@@ -722,6 +745,17 @@ export async function runPageCrumpleTransition({
       material.uniforms.uTextureMix.value = mix;
       renderer.render(scene, camera);
     });
+
+    // Performance: tras el crossfade (mix=1) el shader solo muestrea uTargetMap,
+    // así que desenganchamos y liberamos la textura origen para bajar el pico
+    // de memoria de GPU durante el desarrugado.
+    material.uniforms.uSourceMap.value = targetTexture;
+    sourceTexture?.dispose();
+    sourceTexture = null;
+    if (sourceCanvas) {
+      sourceCanvas.width = sourceCanvas.height = 1;
+      sourceCanvas = null;
+    }
 
     onPhaseChange("uncrumpling");
     await animateValue(1, 0, UNCRUMPLE_DURATION, signal, (progress, elapsed) => {
