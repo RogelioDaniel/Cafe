@@ -500,6 +500,112 @@ function animateValue(
   });
 }
 
+// --- Background snapshot cache -------------------------------------------------
+// El cuello de botella real de la transición NO es el shader ni el efecto de
+// doblar/desdoblar, sino `domToCanvas`, que reconstruye todo el DOM visible y
+// lo rasteriza en el hilo principal justo al hacer click (~1-2s).
+// Para eliminar esa espera percibida, capturamos el viewport en segundo plano
+// cuando el navegador está ocioso y lo cacheamos. Al hacer click, si la cache
+// sigue válida, entregamos la textura al instante y el papel empieza a
+// arrugarse sin ninguna espera inicial.
+type CachedSnapshot = {
+  canvas: HTMLCanvasElement;
+  signature: string;
+};
+
+let snapshotCache: CachedSnapshot | null = null;
+let snapshotPriming: Promise<HTMLCanvasElement | null> | null = null;
+let reprimeTimer: number | null = null;
+let reprimeIdleHandle: number | null = null;
+
+function snapshotSignature() {
+  // El viewport visible depende del tamaño y de la posición de scroll; si
+  // cualquiera cambia, la cache queda obsoleta y se descarta.
+  const root = document.documentElement;
+  return `${root.clientWidth}x${window.innerHeight}@${Math.round(window.scrollY)}`;
+}
+
+function clearReprimeSchedule() {
+  if (reprimeTimer !== null) {
+    window.clearTimeout(reprimeTimer);
+    reprimeTimer = null;
+  }
+  if (reprimeIdleHandle !== null) {
+    window.cancelIdleCallback?.(reprimeIdleHandle);
+    reprimeIdleHandle = null;
+  }
+}
+
+function scheduleReprime(delay = 600) {
+  clearReprimeSchedule();
+  // Tras un asentamiento (scroll/resize), volvemos a precapturar en idle para
+  // mantener la cache caliente para el siguiente click.
+  reprimeTimer = window.setTimeout(() => {
+    reprimeTimer = null;
+    const run = () => {
+      reprimeIdleHandle = null;
+      void primePageCrumpleSnapshot();
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      reprimeIdleHandle = window.requestIdleCallback(run, { timeout: 1200 });
+    } else {
+      run();
+    }
+  }, delay);
+}
+
+/** Precaptura el viewport actual en segundo plano y lo guarda en cache. */
+export async function primePageCrumpleSnapshot(): Promise<HTMLCanvasElement | null> {
+  if (!shouldUsePageCrumple()) return null;
+  // Si ya hay una captura en curso, no lanzamos otra paralela.
+  if (snapshotPriming) return snapshotPriming;
+
+  const signature = snapshotSignature();
+  if (snapshotCache && snapshotCache.signature === signature) {
+    return snapshotCache.canvas;
+  }
+
+  snapshotPriming = (async () => {
+    const controller = new AbortController();
+    const [, { domToCanvas }] = await getModules();
+    try {
+      const canvas = await captureViewport(domToCanvas, controller.signal);
+      if (canvas) {
+        snapshotCache = { canvas, signature };
+      }
+      return canvas;
+    } catch {
+      return null;
+    } finally {
+      snapshotPriming = null;
+    }
+  })();
+
+  return snapshotPriming;
+}
+
+/** Devuelve la cache si sigue siendo válida para el viewport actual. */
+function consumeCachedSnapshot(): HTMLCanvasElement | null {
+  if (!snapshotCache) return null;
+  if (snapshotCache.signature !== snapshotSignature()) {
+    snapshotCache = null;
+    return null;
+  }
+  // Entregamos la canvas y vaciamos la cache: la página va a cambiar, así que
+  // esta captura ya no nos sirve para la siguiente navegación.
+  const canvas = snapshotCache.canvas;
+  snapshotCache = null;
+  return canvas;
+}
+
+/** Descarta la cache (p. ej. al desmontar el provider o al iniciar transición). */
+export function invalidatePageCrumpleSnapshot() {
+  snapshotCache = null;
+  clearReprimeSchedule();
+}
+
+// ----------------------------------------------------------------------------
+
 export function shouldUsePageCrumple() {
   if (typeof window === "undefined") return false;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -510,6 +616,13 @@ export function shouldUsePageCrumple() {
 export function preparePageCrumple() {
   if (!shouldUsePageCrumple()) return;
   void getModules();
+  // Tras el warm-up de módulos, precapturamos el viewport en segundo plano
+  // para que el primer click pueda arrancar el arrugado sin esperar captura.
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(() => void primePageCrumpleSnapshot(), { timeout: 2000 });
+  } else {
+    window.setTimeout(() => void primePageCrumpleSnapshot(), 1200);
+  }
 }
 
 export async function runPageCrumpleTransition({
@@ -577,7 +690,22 @@ export async function runPageCrumpleTransition({
     document.addEventListener("visibilitychange", abortOnVisibility);
 
     await nextFrame(signal);
-    sourceCanvas = await captureViewport(domToCanvas, signal);
+    // Performance: si la cache de captura en background sigue siendo válida
+    // para el viewport actual, la usamos al instante y nos saltamos el coste
+    // de `domToCanvas` (~1-2s) en el camino crítico. Si no, capturamos en
+    // caliente como antes.
+    sourceCanvas = consumeCachedSnapshot();
+    if (!sourceCanvas) {
+      // Si hay una captura en curso en background, esperarla (acotado) evita
+      // una captura duplicada. Solo se acepta si su signatura sigue válida.
+      if (snapshotPriming) {
+        await Promise.race([snapshotPriming, wait(220, signal).then(() => null)]);
+      }
+      sourceCanvas = consumeCachedSnapshot();
+    }
+    if (!sourceCanvas) {
+      sourceCanvas = await captureViewport(domToCanvas, signal);
+    }
     throwIfAborted(signal);
 
     root.style.overflow = "hidden";
@@ -801,5 +929,7 @@ export async function runPageCrumpleTransition({
     if (sourceCanvas) sourceCanvas.width = sourceCanvas.height = 1;
     if (targetCanvas) targetCanvas.width = targetCanvas.height = 1;
     if (transitionStarted) dispatchPaperTransition(false);
+    // Vuelve a calentar la cache para la próxima navegación, en segundo plano.
+    scheduleReprime(400);
   }
 }

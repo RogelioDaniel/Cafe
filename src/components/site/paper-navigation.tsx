@@ -11,7 +11,9 @@ import {
   type ReactNode,
 } from "react";
 import {
+  invalidatePageCrumpleSnapshot,
   preparePageCrumple,
+  primePageCrumpleSnapshot,
   runPageCrumpleTransition,
   type PageCrumplePhase,
 } from "./page-crumple-transition";
@@ -187,8 +189,35 @@ export function PaperNavigationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const warmup = window.setTimeout(preparePageCrumple, 900);
+
+    // La cache de captura en background se valida por tamaño + posición de
+    // scroll. Invalidamos al asentarse scroll/resize para forzar una
+    // recaptura fresca antes del siguiente click.
+    const onViewportSettled = () => {
+      invalidatePageCrumpleSnapshot();
+      // Recalentamos la cache en idle tras un breve asentamiento.
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(() => void primePageCrumpleSnapshot(), { timeout: 2000 });
+      } else {
+        window.setTimeout(() => void primePageCrumpleSnapshot(), 400);
+      }
+    };
+    let settleTimer: number | null = null;
+    const debouncedSettle = () => {
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        settleTimer = null;
+        onViewportSettled();
+      }, 500);
+    };
+    window.addEventListener("scroll", debouncedSettle, { passive: true });
+    window.addEventListener("resize", debouncedSettle, { passive: true });
+
     return () => {
       window.clearTimeout(warmup);
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      window.removeEventListener("scroll", debouncedSettle);
+      window.removeEventListener("resize", debouncedSettle);
       transitionAbort.current?.abort();
       clearTimers();
       running.current = false;
